@@ -1,0 +1,8 @@
+﻿.vs
+_ecs_code
+Binaries
+Intermediate
+Source - Copy
+*.sln
+Saved
+.vsconfig
