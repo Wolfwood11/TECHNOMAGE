@@ -1,3 +1,4 @@
+*..uasset filter=lfs diff=lfs merge=lfs -text
 /Content/AdvancedMagicFX12/Textures/T_ky_dust02uni_4x4.uasset filter=lfs diff=lfs merge=lfs -text
 /Content/AdvancedMagicFX12/Textures/T_ky_maskRGB3.uasset filter=lfs diff=lfs merge=lfs -text
 /Content/AdvancedMagicFX12/Textures/T_ky_maskRGB5.uasset filter=lfs diff=lfs merge=lfs -text
