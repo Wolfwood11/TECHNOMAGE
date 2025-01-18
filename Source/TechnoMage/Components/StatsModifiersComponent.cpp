@@ -3,7 +3,10 @@
 #include "TechnoMage/Spels/DamageResult.h"
 #include "NiagaraComponent.h"
 #include "GameFramework/Actor.h"
+#include "TechnoMage/ObjectPool.h"
+#include "TechnoMage/Modificators/SubSpell.h"
 #include "TechnoMage/Spels/BaseSpell.h"
+#include "TechnoMage/Subsystems/ActorTrackingSubsystem.h"
 
 UStatsModifiersComponent::UStatsModifiersComponent()
 {
@@ -159,13 +162,18 @@ void UStatsModifiersComponent::HandleSubSpells(const FDamageResult& DamageResult
 		return;
 	}
 
-	for (const FSubSpell& SubSpellData : modifier->SubSpells)
+	for (const USubSpell* SubSpellData : modifier->SubSpells)
 	{
-		if (SubSpellData.InputElement == DamageResult.Element)
+		if (!SubSpellData)
+		{
+			continue;
+		}
+
+		if (SubSpellData->InputElement == DamageResult.Element)
 		{
 			// Шанс отмены текущего эффекта
 			float DiscardRandomChance = FMath::FRandRange(0.0f, 100.0f);
-			if (DiscardRandomChance <= SubSpellData.DiscardProbability)
+			if (DiscardRandomChance <= SubSpellData->DiscardProbability)
 			{
 				DeactivateEffects(ActiveElementalModifier);
 				RemoveModifier(modifier);
@@ -174,10 +182,10 @@ void UStatsModifiersComponent::HandleSubSpells(const FDamageResult& DamageResult
 
 			// Шанс создания субзаклинания
 			float SpawnRandomChance = FMath::FRandRange(0.0f, 100.0f);
-			if (SpawnRandomChance <= SubSpellData.Probability && SubSpellData.SubSpell)
+			if (SpawnRandomChance <= SubSpellData->Probability && SubSpellData->SubSpell)
 			{
-				SpawnSubSpell(SubSpellData.SubSpell);
-				UE_LOG(LogTemp, Log, TEXT("SubSpell spawned: %s"), *SubSpellData.SubSpell->GetName());
+				SpawnSubSpell(SubSpellData->SubSpell);
+				UE_LOG(LogTemp, Log, TEXT("SubSpell spawned: %s"), *SubSpellData->SubSpell->GetName());
 			}
 		}
 	}
@@ -200,17 +208,25 @@ bool UStatsModifiersComponent::IsElementalModifier(ESpellElement Element)
 	}
 }
 
-void UStatsModifiersComponent::SpawnSubSpell(const ABaseSpell* SubSpell) const
+void UStatsModifiersComponent::SpawnSubSpell(const TSubclassOf<ABaseSpell>& SubSpell) const
 {
 	if (!SubSpell)
 	{
 		return;
 	}
 
-	ABaseSpell* SpawnedSpell = GetWorld()->SpawnActor<ABaseSpell>(SubSpell->GetClass(), GetOwner()->GetActorLocation(), FRotator::ZeroRotator);
-	if (SpawnedSpell)
+	AObjectPool* objectPool = nullptr;
+	if (UActorTrackingSubsystem* Subsystem = GetWorld()->GetSubsystem<UActorTrackingSubsystem>())
 	{
-		UE_LOG(LogTemp, Log, TEXT("SubSpell %s spawned at location %s"), *SpawnedSpell->GetName(), *GetOwner()->GetActorLocation().ToString());
+		objectPool = Subsystem->GetRegisteredActor();
+	}
+
+	if (objectPool)
+	{
+		if (ABaseSpell* Spell = Cast<ABaseSpell>(objectPool->GetObject(SubSpell)))
+		{
+			Spell->ActivateFromPoll(GetOwner()->GetActorTransform(), GetOwner());
+		}
 	}
 }
 

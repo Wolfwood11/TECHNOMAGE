@@ -40,10 +40,6 @@ private:
 	// Время до следующего каста
 	float CasterCooldownTimer;
 
-	// Ссылка на пул объектов
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spell Caster", meta = (AllowPrivateAccess = "true"))
-	AObjectPool* ObjectPool;
-
 	// Ссылка на компонент маны
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spell Caster", meta = (AllowPrivateAccess = "true"))
 	UCharacterResourcePool* ManaPool;

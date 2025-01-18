@@ -2,6 +2,7 @@
 #include "BasePoolableActor.h"
 #include "Engine/World.h"
 #include "TimerManager.h"
+#include "Subsystems/ActorTrackingSubsystem.h"
 
 AObjectPool::AObjectPool()
 {
@@ -12,7 +13,20 @@ AObjectPool::AObjectPool()
 void AObjectPool::BeginPlay()
 {
 	Super::BeginPlay();
+	if (UActorTrackingSubsystem* Subsystem = GetWorld()->GetSubsystem<UActorTrackingSubsystem>())
+	{
+		Subsystem->RegisterActor(this);
+	}
 	InitializePool();
+}
+
+void AObjectPool::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	if (UActorTrackingSubsystem* Subsystem = GetWorld()->GetSubsystem<UActorTrackingSubsystem>())
+	{
+		Subsystem->UnregisterActor(this);
+	}
+	Super::EndPlay(EndPlayReason);
 }
 
 void AObjectPool::InitializePool()
@@ -72,6 +86,39 @@ ABasePoolableActor* AObjectPool::GetObject(int32 Key)
 		if (NewObject)
 		{
 			Pool.Add(NewObject);
+			NewObject->GetFromPool();
+			return NewObject;
+		}
+	}
+
+	return nullptr; // Нет доступных объектов и не удалось создать новый
+}
+
+class ABasePoolableActor* AObjectPool::GetObject(const TSubclassOf<class ABasePoolableActor>& Type)
+{
+	// Проверяем, есть ли объекты в пуле и соответствуют ли они указанному типу
+	for (auto& PoolPair : ObjectPools)
+	{
+		TArray<ABasePoolableActor*>& Pool = PoolPair.Value;
+
+		for (ABasePoolableActor* Object : Pool)
+		{
+			if (Object && Object->IsPooled() && Object->IsA(Type))
+			{
+				Object->GetFromPool();
+				return Object;
+			}
+		}
+	}
+
+	// Если нет доступных объектов, создаём новый объект указанного типа
+	if (*Type)
+	{
+		ABasePoolableActor* NewObject = GetWorld()->SpawnActor<ABasePoolableActor>(Type);
+		if (NewObject)
+		{
+			int32 Key = ObjectPools.Num(); // Генерируем новый ключ
+			ObjectPools.FindOrAdd(Key).Add(NewObject);
 			NewObject->GetFromPool();
 			return NewObject;
 		}

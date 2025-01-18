@@ -3,35 +3,14 @@
 #pragma once
 #include "CoreMinimal.h"
 #include "TechnoMage/Enums/Enums.h"
-#include "UObject/NoExportTypes.h"
 #include "Engine/Texture2D.h"         
 #include "NiagaraSystem.h"            
 #include "Particles/ParticleSystem.h" 
 #include "TechnoMage/Spels/SpellElement.h"
 #include "ModifierData.generated.h"
 
-class ABaseSpell;
 
-USTRUCT(BlueprintType)
-struct FSubSpell
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Modifier")
-	ESpellElement InputElement;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Modifier")
-	float Probability = 20.f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Modifier")
-	ABaseSpell* SubSpell;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Modifier")
-	float DiscardProbability = 10.f;
-
-	FSubSpell()
-		: InputElement(ESpellElement::Normal), SubSpell(nullptr) {}
-};
+class USubSpell;
 /**
  *
  */
@@ -49,7 +28,7 @@ public:
 	ESpellElement ModifierElement;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Modifier")
-	TArray<FSubSpell> SubSpells;
+	TArray<USubSpell*> SubSpells;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Modifier")
 	float Chance;

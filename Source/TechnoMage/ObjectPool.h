@@ -14,6 +14,7 @@ public:
 
 	// Получить объект из пула по ключу
 	class ABasePoolableActor* GetObject(int32 Key);
+	class ABasePoolableActor* GetObject(const TSubclassOf<class ABasePoolableActor>& Type);
 
 	// Вернуть объект в пул
 	void ReturnObject(ABasePoolableActor* Object);
@@ -24,6 +25,7 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	// Конфигурация пула: ключ (int32) и класс для спавна
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Pool Configuration")

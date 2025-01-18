@@ -6,6 +6,7 @@
 #include "TechnoMage/ObjectPool.h"
 #include "TechnoMage/Characters/EnemyCharacter.h"
 #include "TechnoMage/Spels/BaseSpell.h"
+#include "TechnoMage/Subsystems/ActorTrackingSubsystem.h"
 
 USpellCaster::USpellCaster()
 {
@@ -27,11 +28,6 @@ void USpellCaster::BeginPlay()
 	if (!ManaPool)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("USpellCaster: ManaPool is not assigned!"));
-	}
-
-	if (!ObjectPool)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("USpellCaster: ObjectPool is not assigned!"));
 	}
 }
 
@@ -59,7 +55,14 @@ void USpellCaster::CastNextSpell()
 		return;
 	}
 
-	if (!ObjectPool)
+
+	AObjectPool* objectPool = nullptr;
+	if (UActorTrackingSubsystem* Subsystem = GetWorld()->GetSubsystem<UActorTrackingSubsystem>())
+	{
+		objectPool = Subsystem->GetRegisteredActor();
+	}
+
+	if (!objectPool)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("USpellCaster: ObjectPool is empty!"));
 		return;
@@ -73,7 +76,7 @@ void USpellCaster::CastNextSpell()
 	}
 
 	int32 SpellType = SpellQueue[CurrentSpellIndex];
-	ABaseSpell* Spell = Cast<ABaseSpell>(ObjectPool->GetObject(SpellType));
+	ABaseSpell* Spell = Cast<ABaseSpell>(objectPool->GetObject(SpellType));
 
 	if (Spell && CanCastSpell(Spell))
 	{

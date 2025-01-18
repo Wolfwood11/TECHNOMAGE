@@ -6,6 +6,7 @@
 #include "StatsModifiersComponent.generated.h"
 
 
+class ABaseSpell;
 struct FDamageResult;
 // Компонент для управления модификаторами
 UCLASS(BlueprintType, Blueprintable, ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
@@ -29,7 +30,7 @@ public:
 	void ApplyModifier(const FDamageResult& DamageResult);
 	void RemoveModifier(const UModifierData* Modifier);
 	void HandleSubSpells(const FDamageResult& DamageResult, FModifierStateData& ActiveElementalModifier);
-	void SpawnSubSpell(const ABaseSpell* SubSpell) const;
+	void SpawnSubSpell(const TSubclassOf<ABaseSpell>& SubSpell) const;
 
 	static bool IsElementalModifier(ESpellElement Element);
 

@@ -3,6 +3,7 @@
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "TechnoMage/Components/CharacterResourcePool.h"
+#include "TechnoMage/UIActors/DamageNumberActor.h"
 
 ABaseCharacter::ABaseCharacter()
 {
@@ -92,7 +93,13 @@ void ABaseCharacter::ApplyDamage(const FDamageResult& damageResult)
 {
 	if (HealthPool)
 	{
-		HealthPool->ConsumeResource(damageResult.Damage);
+		const auto Damage = damageResult.Damage;
+		HealthPool->ConsumeResource(Damage);
+		if (ADamageNumberActor* DamageNumber = GetWorld()->SpawnActor<ADamageNumberActor>(ADamageNumberActor::StaticClass(), GetActorLocation() + FVector(0.f, 0.f, 200.f), GetActorRotation()))
+		{
+			DamageNumber->Initialize(Damage);
+		}
+
 		if (!IsAlive())
 		{
 			Destroy();
