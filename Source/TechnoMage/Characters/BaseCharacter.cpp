@@ -2,7 +2,9 @@
 
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "TechnoMage/ObjectPool.h"
 #include "TechnoMage/Components/CharacterResourcePool.h"
+#include "TechnoMage/Subsystems/ActorTrackingSubsystem.h"
 #include "TechnoMage/UIActors/DamageNumberActor.h"
 
 ABaseCharacter::ABaseCharacter()
@@ -95,9 +97,27 @@ void ABaseCharacter::ApplyDamage(const FDamageResult& damageResult)
 	{
 		const auto Damage = damageResult.Damage;
 		HealthPool->ConsumeResource(Damage);
-		if (ADamageNumberActor* DamageNumber = GetWorld()->SpawnActor<ADamageNumberActor>(ADamageNumberActor::StaticClass(), GetActorLocation() + FVector(0.f, 0.f, 200.f), GetActorRotation()))
+
+		AObjectPool* objectPool = nullptr;
+		if (UActorTrackingSubsystem* Subsystem = GetWorld()->GetSubsystem<UActorTrackingSubsystem>())
 		{
-			DamageNumber->Initialize(Damage);
+			objectPool = Subsystem->GetRegisteredActor();
+		}
+
+		if (!objectPool)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("USpellCaster: ObjectPool is empty!"));
+			return;
+		}
+
+		if (ADamageNumberActor* DamageNumber = Cast<ADamageNumberActor>(objectPool->GetObject(ADamageNumberActor::StaticClass())))
+		{
+			FTransform DamageTextTransform(
+				FQuat::Identity,                       // Поворот сброшен
+				GetActorLocation(), // Позиция на 200 единиц выше актора
+				FVector(1.0f)                          // Масштаб по умолчанию
+			);
+			DamageNumber->Initialize(Damage, DamageTextTransform, this, damageResult.bIsCritical);
 		}
 
 		if (!IsAlive())

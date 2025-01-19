@@ -21,10 +21,6 @@ void USpellCaster::BeginPlay()
 {
 	Super::BeginPlay();
 
-	SpellQueue.Add(0);
-	SpellQueue.Add(1);
-	SpellQueue.Add(0);
-
 	if (!ManaPool)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("USpellCaster: ManaPool is not assigned!"));
@@ -75,7 +71,7 @@ void USpellCaster::CastNextSpell()
 		return;
 	}
 
-	int32 SpellType = SpellQueue[CurrentSpellIndex];
+	auto SpellType = SpellQueue[CurrentSpellIndex];
 	ABaseSpell* Spell = Cast<ABaseSpell>(objectPool->GetObject(SpellType));
 
 	if (Spell && CanCastSpell(Spell))

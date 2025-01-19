@@ -7,7 +7,6 @@
 AObjectPool::AObjectPool()
 {
 	PrimaryActorTick.bCanEverTick = false;
-	InitialPoolSize = 5; // Базовый размер пула по умолчанию
 }
 
 void AObjectPool::BeginPlay()
@@ -31,17 +30,17 @@ void AObjectPool::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 void AObjectPool::InitializePool()
 {
-	for (const TPair<int32, TSubclassOf<ABasePoolableActor>>& Entry : PoolConfig)
+	for (const TPair<TSubclassOf<ABasePoolableActor>, int32>& Entry : PoolConfig)
 	{
-		int32 Key = Entry.Key;
-		TSubclassOf<ABasePoolableActor> ActorClass = Entry.Value;
+		TSubclassOf<ABasePoolableActor> ActorClass = Entry.Key;
+		int32 InitialCount = Entry.Value;
 
-		if (!ActorClass) continue;
+		if (!ActorClass || InitialCount <= 0) continue;
 
-		TArray<ABasePoolableActor*>& Pool = ObjectPools.FindOrAdd(Key);
-		for (int32 i = 0; i < InitialPoolSize; ++i)
+		TArray<ABasePoolableActor*>& Pool = ObjectPools.FindOrAdd(ActorClass);
+		for (int32 i = 0; i < InitialCount; ++i)
 		{
-			ABasePoolableActor* NewObject = CreateNewObject(Key);
+			ABasePoolableActor* NewObject = CreateNewObject(ActorClass);
 			if (NewObject)
 			{
 				Pool.Add(NewObject);
@@ -50,29 +49,28 @@ void AObjectPool::InitializePool()
 	}
 }
 
-ABasePoolableActor* AObjectPool::CreateNewObject(int32 Key)
+ABasePoolableActor* AObjectPool::CreateNewObject(const TSubclassOf<ABasePoolableActor>& Type)
 {
-	if (!PoolConfig.Contains(Key)) return nullptr;
+	if (!Type || !Type->IsChildOf(ABasePoolableActor::StaticClass())) return nullptr;
 
-	TSubclassOf<ABasePoolableActor> ActorClass = PoolConfig[Key];
-	if (!ActorClass) return nullptr;
-
-	ABasePoolableActor* NewObject = GetWorld()->SpawnActor<ABasePoolableActor>(ActorClass, FVector::ZeroVector, FRotator::ZeroRotator);
+	ABasePoolableActor* NewObject = GetWorld()->SpawnActor<ABasePoolableActor>(Type, FVector::ZeroVector, FRotator::ZeroRotator);
 	if (NewObject)
 	{
-		_actors.Add(NewObject);
 		NewObject->ReturnToPool();
 	}
 
 	return NewObject;
 }
 
-ABasePoolableActor* AObjectPool::GetObject(int32 Key)
+ABasePoolableActor* AObjectPool::GetObject(const TSubclassOf<ABasePoolableActor>& Type)
 {
-	if (!ObjectPools.IsEmpty() && ObjectPools.Contains(Key))
+	if (!Type || !Type->IsChildOf(ABasePoolableActor::StaticClass())) return nullptr;
+
+	// Проверяем, есть ли объекты в пуле для данного типа
+	TArray<ABasePoolableActor*>* Pool = ObjectPools.Find(Type);
+	if (Pool)
 	{
-		TArray<ABasePoolableActor*>& Pool = ObjectPools[Key];
-		for (ABasePoolableActor* Object : Pool)
+		for (ABasePoolableActor* Object : *Pool)
 		{
 			if (Object && Object->IsPooled())
 			{
@@ -80,51 +78,22 @@ ABasePoolableActor* AObjectPool::GetObject(int32 Key)
 				return Object;
 			}
 		}
-
-		// Если в пуле нет доступных объектов, создаём новый
-		ABasePoolableActor* NewObject = CreateNewObject(Key);
-		if (NewObject)
-		{
-			Pool.Add(NewObject);
-			NewObject->GetFromPool();
-			return NewObject;
-		}
 	}
 
-	return nullptr; // Нет доступных объектов и не удалось создать новый
-}
-
-class ABasePoolableActor* AObjectPool::GetObject(const TSubclassOf<class ABasePoolableActor>& Type)
-{
-	// Проверяем, есть ли объекты в пуле и соответствуют ли они указанному типу
-	for (auto& PoolPair : ObjectPools)
+	// Если объект не найден в пуле, создаём новый
+	ABasePoolableActor* NewObject = CreateNewObject(Type);
+	if (NewObject)
 	{
-		TArray<ABasePoolableActor*>& Pool = PoolPair.Value;
-
-		for (ABasePoolableActor* Object : Pool)
+		if (!Pool)
 		{
-			if (Object && Object->IsPooled() && Object->IsA(Type))
-			{
-				Object->GetFromPool();
-				return Object;
-			}
+			ObjectPools.Add(Type, TArray<ABasePoolableActor*>());
 		}
+		ObjectPools[Type].Add(NewObject);
+		NewObject->GetFromPool();
+		return NewObject;
 	}
 
-	// Если нет доступных объектов, создаём новый объект указанного типа
-	if (*Type)
-	{
-		ABasePoolableActor* NewObject = GetWorld()->SpawnActor<ABasePoolableActor>(Type);
-		if (NewObject)
-		{
-			int32 Key = ObjectPools.Num(); // Генерируем новый ключ
-			ObjectPools.FindOrAdd(Key).Add(NewObject);
-			NewObject->GetFromPool();
-			return NewObject;
-		}
-	}
-
-	return nullptr; // Нет доступных объектов и не удалось создать новый
+	return nullptr; // Не удалось найти или создать объект
 }
 
 void AObjectPool::ReturnObject(ABasePoolableActor* Object)

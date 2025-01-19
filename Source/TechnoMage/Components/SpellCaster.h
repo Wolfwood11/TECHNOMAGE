@@ -46,7 +46,7 @@ private:
 
 	// Очередь заклинаний для каста
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spell Caster", meta = (AllowPrivateAccess = "true"))
-	TArray<int32> SpellQueue;
+	TArray<TSubclassOf<class ABaseSpell>> SpellQueue;
 
 	// Кулдаун между повторами всей очереди
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spell Caster", meta = (AllowPrivateAccess = "true"))
