@@ -35,19 +35,54 @@ void USaveSubsystem::SaveActorData(AActor* Actor, const FString& ActorID)
 	// Проверяем, реализует ли актор интерфейс SaveableInterface
 	if (Actor->GetClass()->ImplementsInterface(USaveableInterface::StaticClass()))
 	{
-		FActorSaveData SaveData;
-		SaveData.ActorID = ActorID;
-		SaveData.ActorTransform = Actor->GetActorTransform();
+		// Ищем, существует ли уже запись для данного актора
+		FActorSaveData* ExistingSaveData = SaveGameInstance->SavedActors.FindByPredicate(
+			[&ActorID](const FActorSaveData& Data) { return Data.ActorID == ActorID; });
 
-		// Вызываем интерфейс для сохранения данных
-		ISaveableInterface::Execute_SaveData(Actor, SaveData.CustomData);
+		FActorSaveData NewSaveData;
+		NewSaveData.ActorID = ActorID;
+		NewSaveData.ActorTransform = Actor->GetActorTransform();
 
-		SaveGameInstance->SavedActors.Add(SaveData);
+		// Вызываем интерфейс для сохранения данных актора
+		ISaveableInterface::Execute_SaveData(Actor, NewSaveData.CustomData);
+
+		// Сохраняем данные компонентов
+		for (UActorComponent* Component : Actor->GetComponents())
+		{
+			if (Component->GetClass()->ImplementsInterface(USaveableInterface::StaticClass()))
+			{
+				FComponentSaveData ComponentSaveData;
+
+				// Сохраняем имя компонента
+				ComponentSaveData.ComponentName = Component->GetFName();
+
+				// Сохраняем данные компонента
+				ISaveableInterface::Execute_SaveData(Component, ComponentSaveData.ComponentData);
+
+				NewSaveData.ComponentData.Add(ComponentSaveData);
+			}
+		}
+
+		if (ExistingSaveData)
+		{
+			// Обновляем существующие данные
+			*ExistingSaveData = NewSaveData;
+		}
+		else
+		{
+			// Добавляем новые данные
+			SaveGameInstance->SavedActors.Add(NewSaveData);
+		}
 	}
+
+	SaveGame("DefaultSaveSlot");
 }
+
 
 void USaveSubsystem::LoadActorData(AActor* Actor, const FString& ActorID)
 {
+	LoadGame("DefaultSaveSlot");
+
 	if (!SaveGameInstance || !Actor)
 	{
 		return;
@@ -62,10 +97,31 @@ void USaveSubsystem::LoadActorData(AActor* Actor, const FString& ActorID)
 		// Устанавливаем трансформ актора
 		Actor->SetActorTransform(FoundData->ActorTransform);
 
-		// Вызываем интерфейс для загрузки данных
+		// Вызываем интерфейс для загрузки данных актора
 		if (Actor->GetClass()->ImplementsInterface(USaveableInterface::StaticClass()))
 		{
 			ISaveableInterface::Execute_LoadData(Actor, FoundData->CustomData);
+		}
+
+		// Загружаем данные компонентов
+		TMap<FName, UActorComponent*> ComponentMap;
+		for (UActorComponent* Component : Actor->GetComponents())
+		{
+			if (Component)
+			{
+				ComponentMap.Add(Component->GetFName(), Component);
+			}
+		}
+
+		for (const FComponentSaveData& ComponentSaveData : FoundData->ComponentData)
+		{
+			if (UActorComponent** FoundComponent = ComponentMap.Find(ComponentSaveData.ComponentName))
+			{
+				if ((*FoundComponent)->GetClass()->ImplementsInterface(USaveableInterface::StaticClass()))
+				{
+					ISaveableInterface::Execute_LoadData(*FoundComponent, ComponentSaveData.ComponentData);
+				}
+			}
 		}
 	}
 }

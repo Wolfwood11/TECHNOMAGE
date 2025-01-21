@@ -3,8 +3,10 @@
 #include "CoreMinimal.h"
 #include "BaseCharacter.h"
 #include "InputActionValue.h"
+#include "TechnoMage/Interfaces/SaveableInterface.h"
 #include "BasePlayerCharacter.generated.h"
 
+class ULevelingComponent;
 class USpringArmComponent;
 class UCameraComponent;
 class UInputMappingContext;
@@ -15,12 +17,24 @@ class UDashComponent;
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
 UCLASS()
-class TECHNOMAGE_API ABasePlayerCharacter : public ABaseCharacter
+class TECHNOMAGE_API ABasePlayerCharacter : public ABaseCharacter, public ISaveableInterface
 {
 	GENERATED_BODY()
 
 public:
 	ABasePlayerCharacter();
+
+	// Реализация интерфейса сохранения
+	virtual void SaveData_Implementation(TArray<uint8>& OutData) override;
+	virtual void LoadData_Implementation(const TArray<uint8>& InData) override;
+
+	virtual void AddExp_Implementation(int exp) override;
+	virtual int32 GetLevel_Implementation() const override;
+	virtual int32 GetExp_Implementation() const override;
+	virtual int32 GetExpToNextLevel_Implementation() const override;
+
+	virtual float GetMana_Implementation() const override;
+	virtual float GetMaxMana_Implementation() const override;
 
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
@@ -47,9 +61,6 @@ public:
 	void Fire(const FInputActionValue& Value);
 	void ExecuteDash();
 
-	virtual float GetMana_Implementation() const override;
-	virtual float GetMaxMana_Implementation() const override;
-
 protected:
 	virtual void BeginPlay() override;
 
@@ -71,4 +82,7 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Dash", meta = (AllowPrivateAccess = "true"))
 	UDashComponent* Dash;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Dash", meta = (AllowPrivateAccess = "true"))
+	ULevelingComponent* Leveling;
 };

@@ -20,12 +20,14 @@ public:
 	// Реализация интерфейсов
 	virtual void ApplyDamage(const FDamageResult& damageResult) override;
 	virtual bool IsAlive() const override;
+	virtual void Die();
 
 	virtual TArray<UModifierData*> GetModifiers_Implementation(EModifierType Type) const override;
 	virtual float GetHealth_Implementation() const override;
 	virtual float GetMana_Implementation() const override;
 	virtual float GetMaxHealth_Implementation() const override;
 	virtual float GetMaxMana_Implementation() const override;
+	virtual void AddExp_Implementation(int exp) override;
 
 protected:
 	virtual void BeginPlay() override;

@@ -1,4 +1,4 @@
-#include "BasePlayerCharacter.h"
+﻿#include "BasePlayerCharacter.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "TechnoMage/Components/SpellCaster.h"
@@ -7,7 +7,12 @@
 #include "EnhancedInputSubsystems.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Serialization/BufferArchive.h"
 #include "TechnoMage/Components/CharacterResourcePool.h"
+#include "Serialization/BufferArchive.h"
+#include "Serialization/MemoryReader.h"
+#include "TechnoMage/Components/LevelingComponent.h"
+#include "TechnoMage/Subsystems/SaveSubsystem.h"
 
 ABasePlayerCharacter::ABasePlayerCharacter()
 {
@@ -50,6 +55,55 @@ ABasePlayerCharacter::ABasePlayerCharacter()
 	}
 	SpellCaster = CreateDefaultSubobject<USpellCaster>(TEXT("SpellCaster"));
 	Dash = CreateDefaultSubobject<UDashComponent>(TEXT("Dash"));
+
+	Leveling = CreateDefaultSubobject<ULevelingComponent>(TEXT("Leveling"));
+}
+
+void ABasePlayerCharacter::SaveData_Implementation(TArray<uint8>& OutData)
+{
+	FBufferArchive Archive;
+	OutData = static_cast<TArray<unsigned char>>(Archive);
+}
+
+void ABasePlayerCharacter::LoadData_Implementation(const TArray<uint8>& InData)
+{
+	FMemoryReader Reader(InData);
+
+	// Создаём мапу для быстрого поиска компонентов
+	TMap<FName, UActorComponent*> ComponentMap;
+	for (UActorComponent* Component : GetComponents())
+	{
+		if (Component)
+		{
+			ComponentMap.Add(Component->GetFName(), Component);
+		}
+	}
+
+	// Загружаем данные для компонентов
+	while (Reader.Tell() < Reader.TotalSize())
+	{
+		// Загружаем имя компонента
+		FName ComponentName;
+		Reader << ComponentName;
+
+		// Загружаем размер данных компонента
+		int32 DataSize;
+		Reader << DataSize;
+
+		// Загружаем данные компонента
+		TArray<uint8> ComponentData;
+		ComponentData.SetNum(DataSize);
+		Reader.Serialize(ComponentData.GetData(), DataSize);
+
+		// Находим компонент в мапе
+		if (UActorComponent** FoundComponent = ComponentMap.Find(ComponentName))
+		{
+			if ((*FoundComponent)->GetClass()->ImplementsInterface(USaveableInterface::StaticClass()))
+			{
+				ISaveableInterface::Execute_LoadData(*FoundComponent, ComponentData);
+			}
+		}
+	}
 }
 
 void ABasePlayerCharacter::BeginPlay()
@@ -64,6 +118,11 @@ void ABasePlayerCharacter::BeginPlay()
 	if (Dash && ManaPool)
 	{
 		Dash->SetManaPool(ManaPool);
+	}
+
+	if (USaveSubsystem* SaveSubsystem = GetWorld()->GetGameInstance()->GetSubsystem<USaveSubsystem>())
+	{
+		SaveSubsystem->LoadActorData(this, "Player");
 	}
 }
 
@@ -124,6 +183,30 @@ void ABasePlayerCharacter::ExecuteDash()
 	{
 		Dash->PerformDash();
 	}
+}
+
+void ABasePlayerCharacter::AddExp_Implementation(int exp)
+{
+	Leveling->AddExperience(exp);
+	if (USaveSubsystem* SaveSubsystem = GetWorld()->GetGameInstance()->GetSubsystem<USaveSubsystem>())
+	{
+		SaveSubsystem->SaveActorData(this, "Player");
+	}
+}
+
+int32 ABasePlayerCharacter::GetLevel_Implementation() const
+{
+	return 0;
+}
+
+int32 ABasePlayerCharacter::GetExp_Implementation() const
+{
+	return 0;
+}
+
+int32 ABasePlayerCharacter::GetExpToNextLevel_Implementation() const
+{
+	return 0;
 }
 
 float ABasePlayerCharacter::GetMana_Implementation() const

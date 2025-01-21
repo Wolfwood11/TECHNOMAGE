@@ -20,7 +20,7 @@ class ISaveableInterface
 public:
 	// Сохранение данных актора
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Saveable")
-	void SaveData(TArray<uint8>& OutData) const;
+	void SaveData(TArray<uint8>& OutData);
 
 	// Загрузка данных актора
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Saveable")

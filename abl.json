@@ -1,0 +1,90 @@
+[
+	{
+		"Name": "NewRow_9",
+		"Level": 1,
+		"RequiredXP": 5,
+		"HealthBonus": 0,
+		"ManaBonus": 0,
+		"SkillPointsReward": 0
+	},
+	{
+		"Name": "NewRow",
+		"Level": 2,
+		"RequiredXP": 10,
+		"HealthBonus": 10,
+		"ManaBonus": 10,
+		"SkillPointsReward": 0
+	},
+	{
+		"Name": "NewRow_0",
+		"Level": 3,
+		"RequiredXP": 20,
+		"HealthBonus": 10,
+		"ManaBonus": 10,
+		"SkillPointsReward": 0
+	},
+	{
+		"Name": "NewRow_1",
+		"Level": 4,
+		"RequiredXP": 40,
+		"HealthBonus": 10,
+		"ManaBonus": 10,
+		"SkillPointsReward": 0
+	},
+	{
+		"Name": "NewRow_2",
+		"Level": 5,
+		"RequiredXP": 80,
+		"HealthBonus": 10,
+		"ManaBonus": 10,
+		"SkillPointsReward": 0
+	},
+	{
+		"Name": "NewRow_3",
+		"Level": 6,
+		"RequiredXP": 160,
+		"HealthBonus": 10,
+		"ManaBonus": 10,
+		"SkillPointsReward": 0
+	},
+	{
+		"Name": "NewRow_4",
+		"Level": 7,
+		"RequiredXP": 320,
+		"HealthBonus": 10,
+		"ManaBonus": 10,
+		"SkillPointsReward": 0
+	},
+	{
+		"Name": "NewRow_5",
+		"Level": 8,
+		"RequiredXP": 640,
+		"HealthBonus": 10,
+		"ManaBonus": 10,
+		"SkillPointsReward": 0
+	},
+	{
+		"Name": "NewRow_6",
+		"Level": 9,
+		"RequiredXP": 1080,
+		"HealthBonus": 10,
+		"ManaBonus": 10,
+		"SkillPointsReward": 0
+	},
+	{
+		"Name": "NewRow_7",
+		"Level": 10,
+		"RequiredXP": 2160,
+		"HealthBonus": 12,
+		"ManaBonus": 12,
+		"SkillPointsReward": 0
+	},
+	{
+		"Name": "NewRow_8",
+		"Level": 11,
+		"RequiredXP": 4320,
+		"HealthBonus": 12,
+		"ManaBonus": 12,
+		"SkillPointsReward": 0
+	}
+]

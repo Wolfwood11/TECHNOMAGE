@@ -3,18 +3,22 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "TechnoMage/Enums/Enums.h"
+#include "TechnoMage/Interfaces/SaveableInterface.h"
 #include "CharacterResourcePool.generated.h"
 
 // Делегат для уведомления владельца
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnResourceDepleted);
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
-class TECHNOMAGE_API UCharacterResourcePool : public UActorComponent
+class TECHNOMAGE_API UCharacterResourcePool : public UActorComponent, public ISaveableInterface
 {
 	GENERATED_BODY()
 
 public:
 	UCharacterResourcePool();
+
+	virtual void SaveData_Implementation(TArray<uint8>& OutData) override;
+	virtual void LoadData_Implementation(const TArray<uint8>& InData) override;
 
 	// Установить новое значение ресурса
 	UFUNCTION(BlueprintCallable, Category = "Resource Pool")

@@ -4,6 +4,19 @@
 #include "ActorSaveData.generated.h"
 
 
+USTRUCT(BlueprintType)
+struct FComponentSaveData
+{
+	GENERATED_BODY()
+
+	// Имя компонента
+	UPROPERTY()
+	FName ComponentName;
+
+	// Данные компонента
+	UPROPERTY()
+	TArray<uint8> ComponentData;
+};
 // Структура для хранения данных актора
 USTRUCT(BlueprintType)
 struct FActorSaveData
@@ -11,16 +24,20 @@ struct FActorSaveData
 	GENERATED_BODY()
 
 	// Уникальный идентификатор актора
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "SaveData")
+	UPROPERTY()
 	FString ActorID;
 
 	// Трансформ актора
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "SaveData")
+	UPROPERTY()
 	FTransform ActorTransform;
 
-	// Дополнительные данные актора
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "SaveData")
+	// Данные актора
+	UPROPERTY()
 	TArray<uint8> CustomData;
+
+	// Данные компонентов
+	UPROPERTY()
+	TArray<FComponentSaveData> ComponentData;
 
 	FActorSaveData()
 		: ActorID(TEXT("")), ActorTransform(FTransform::Identity)

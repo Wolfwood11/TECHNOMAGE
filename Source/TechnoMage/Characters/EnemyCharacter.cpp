@@ -18,6 +18,38 @@ AEnemyCharacter::AEnemyCharacter()
 	}
 }
 
+void AEnemyCharacter::Die()
+{
+	// Получаем контроллер игрока
+	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+	if (!PlayerController)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Die: PlayerController not found"));
+		return;
+	}
+
+	// Получаем актёра игрока
+	APawn* PlayerPawn = PlayerController->GetPawn();
+	if (!PlayerPawn)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Die: PlayerPawn not found"));
+		return;
+	}
+
+	// Проверяем, реализует ли актёр интерфейс ICharacterGetersInterface
+	if (PlayerPawn->GetClass()->ImplementsInterface(UCharacterGetersInterface::StaticClass()))
+	{
+		// Вызываем метод AddExp у игрока
+		ICharacterGetersInterface::Execute_AddExp(PlayerPawn, Exp); // Добавляем 100 опыта
+		UE_LOG(LogTemp, Log, TEXT("Die: Added 100 exp to player"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Die: PlayerPawn does not implement ICharacterGetersInterface"));
+	}
+	Super::Die();
+}
+
 void AEnemyCharacter::BeginPlay()
 {
 	Super::BeginPlay();

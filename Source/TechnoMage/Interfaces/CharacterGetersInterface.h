@@ -22,6 +22,9 @@ class TECHNOMAGE_API ICharacterGetersInterface
 	GENERATED_BODY()
 public:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Character Getters")
+	void AddExp(int exp);
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Character Getters")
 	float GetHealth() const;
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Character Getters")
@@ -32,6 +35,17 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Character Getters")
 	float GetMaxMana() const;
+
+
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Character Getters")
+	int32 GetLevel() const;
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Character Getters")
+	int32 GetExp() const;
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Character Getters")
+	int32 GetExpToNextLevel() const;
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Modifiers")
 	TArray<UModifierData*> GetModifiers(EModifierType Type) const;

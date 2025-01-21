@@ -12,6 +12,11 @@ class TECHNOMAGE_API AEnemyCharacter : public ABaseCharacter
 public:
 	AEnemyCharacter();
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Exp", meta = (AllowPrivateAccess = "true"))
+	int Exp = 10;
+
+	virtual void Die() override;
+
 protected:
 	virtual void BeginPlay() override;
 

@@ -1,5 +1,6 @@
 ﻿#include "CharacterResourcePool.h"
 #include "Kismet/GameplayStatics.h"
+#include "Serialization/BufferArchive.h"
 #include "TechnoMage/Interfaces/CharacterGetersInterface.h"
 #include "TechnoMage/Interfaces/DamageableInterface.h"
 
@@ -14,6 +15,28 @@ UCharacterResourcePool::UCharacterResourcePool()
 	bAllowNegativeResource = false;
 	ModifierTypeAffects = EModifierType::Health;
 }
+
+void UCharacterResourcePool::SaveData_Implementation(TArray<uint8>& OutData)
+{
+	FBufferArchive Archive;
+
+	// Сохраняем данные
+	Archive << CurrentResource;
+
+	OutData = static_cast<TArray<unsigned char>>(Archive);
+}
+
+void UCharacterResourcePool::LoadData_Implementation(const TArray<uint8>& InData)
+{
+	FMemoryReader Reader(InData);
+
+	// Загружаем данные
+	Reader << CurrentResource;
+
+	// Логирование для отладки
+	UE_LOG(LogTemp, Log, TEXT("CurrentResource: =%f"), CurrentResource);
+}
+
 
 void UCharacterResourcePool::SetAllowNegativeResource(bool newVal)
 {

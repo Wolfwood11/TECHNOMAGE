@@ -122,7 +122,7 @@ void ABaseCharacter::ApplyDamage(const FDamageResult& damageResult)
 
 		if (!IsAlive())
 		{
-			Destroy();
+			Die();
 			return;
 		}
 		if (StatsModifiersComponent)
@@ -132,13 +132,18 @@ void ABaseCharacter::ApplyDamage(const FDamageResult& damageResult)
 	}
 	else
 	{
-		Destroy();
+		Die();
 	}
 }
 
 bool ABaseCharacter::IsAlive() const
 {
 	return HealthPool ? HealthPool->GetCurrentResource() > 0 : false;
+}
+
+void ABaseCharacter::Die()
+{
+	Destroy();
 }
 
 TArray<UModifierData*> ABaseCharacter::GetModifiers_Implementation(EModifierType Type) const
@@ -164,4 +169,9 @@ float ABaseCharacter::GetMaxHealth_Implementation() const
 float ABaseCharacter::GetMaxMana_Implementation() const
 {
 	return 1.0f;
+}
+
+void ABaseCharacter::AddExp_Implementation(int exp)
+{
+	ICharacterGetersInterface::AddExp_Implementation(exp);
 }
