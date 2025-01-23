@@ -25,6 +25,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Modifiers")
 	void  RemoveOpposite(ESpellElement element);
 
+	UFUNCTION(BlueprintCallable, Category = "Modifiers")
+	static void ProcessModifiers(const TArray<UModifierData*>& Modifiers, float& inValue);
+
 	// Добавить модификатор
 	UFUNCTION(BlueprintCallable, Category = "Modifiers")
 	void ApplyModifier(const FDamageResult& DamageResult);

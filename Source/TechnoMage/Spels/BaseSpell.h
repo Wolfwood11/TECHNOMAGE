@@ -21,6 +21,8 @@ public:
 
 	virtual void ActivateFromPoll(const FTransform& transform, AActor* NewInstigatorActor) override;
 
+	virtual void ActivateSpell(const FTransform& transform, AActor* NewInstigatorActor, float damageModificator = 1.f);
+
 	UFUNCTION(BlueprintCallable, Category = "Modifiers")
 	virtual void AddModifier(UModifierData* modifier);
 
@@ -35,6 +37,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Geters")
 	float GetDamage() const;
+
+	UFUNCTION(BlueprintCallable, Category = "Geters")
+	float GetDamageModificator() const;
 
 	UFUNCTION(BlueprintCallable, Category = "Geters")
 	float GetMaxDamage() const;
@@ -101,4 +106,7 @@ protected:
 	// Эффект столкновения
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects", meta = (AllowPrivateAccess = "true"))
 	UParticleSystem* CollisionEffect;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RuntimeParams", meta = (AllowPrivateAccess = "true"))
+	float DamageModificator = 1.f;
 };

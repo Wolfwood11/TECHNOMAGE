@@ -33,10 +33,35 @@ enum class EModifierType : uint8
 };
 
 UENUM(BlueprintType)
+enum class ECharacterStatType : uint8
+{
+	Strength UMETA(DisplayName = "Strength"),
+	Vitality UMETA(DisplayName = "Vitality"),
+	Agility UMETA(DisplayName = "Agility"),
+	Dexterity UMETA(DisplayName = "Dexterity"),
+	Intelligence UMETA(DisplayName = "Intelligence"),
+};
+
+UENUM(BlueprintType)
+enum class ECharacterParamType : uint8
+{
+	AtkMultiplier UMETA(DisplayName = "AtkMultiplier"),
+	MatkMultiplier UMETA(DisplayName = "MatkMultiplier"),
+	ArmorMultiplier  UMETA(DisplayName = "ArmorMultiplier"),
+	CastDelayMultiplier UMETA(DisplayName = "CastDelayMultiplier"),
+	Evasion UMETA(DisplayName = "Evasion"),
+	Velocity UMETA(DisplayName = "Velocity"),
+	MaxHpMultiplier UMETA(DisplayName = "MaxHpMultiplier"),
+	MaxSpMultiplier UMETA(DisplayName = "MaxSpMultiplier"),
+	HpRegenMultiplier UMETA(DisplayName = "HpRegenMultiplier"),
+	SpRegenMultiplier UMETA(DisplayName = "SpRegenMultiplier"),
+};
+
+UENUM(BlueprintType)
 enum class EModifierOperationType : uint8
 {
 	Add         UMETA(DisplayName = "Add"),           // Добавление (например, +10)
-	Multiply    UMETA(DisplayName = "Multiply"),      // Умножение (например, *1.5)
+	Multiply    UMETA(DisplayName = "Multiply"),      // Умножение (например, *1.5
 	Replace     UMETA(DisplayName = "Replace"),       // Замена текущего значения
 	Subtract    UMETA(DisplayName = "Subtract"),      // Вычитание (например, -10)
 	Divide      UMETA(DisplayName = "Divide"),        // Деление (например, /2)

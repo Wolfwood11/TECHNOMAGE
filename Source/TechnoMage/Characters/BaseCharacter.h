@@ -3,19 +3,21 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "TechnoMage/Components/StatsModifiersComponent.h"
+#include "TechnoMage/Interfaces/CharacterEventsInterface.h"
 #include "TechnoMage/Interfaces/CharacterGetersInterface.h"
+#include "TechnoMage/Interfaces/CharacterSettersInterface.h"
 #include "TechnoMage/Interfaces/DamageableInterface.h"
 #include "BaseCharacter.generated.h"
 
 class UCharacterResourcePool;
 
 UCLASS()
-class TECHNOMAGE_API ABaseCharacter : public ACharacter, public IDamageableInterface, public ICharacterGetersInterface
+class TECHNOMAGE_API ABaseCharacter : public ACharacter, public IDamageableInterface, public ICharacterGetersInterface, public ICharacterSettersInterface, public ICharacterEventsInterface
 {
 	GENERATED_BODY()
 
 public:
-	ABaseCharacter();
+	ABaseCharacter(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 	// Реализация интерфейсов
 	virtual void ApplyDamage(const FDamageResult& damageResult) override;

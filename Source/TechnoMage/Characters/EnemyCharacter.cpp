@@ -37,10 +37,10 @@ void AEnemyCharacter::Die()
 	}
 
 	// Проверяем, реализует ли актёр интерфейс ICharacterGetersInterface
-	if (PlayerPawn->GetClass()->ImplementsInterface(UCharacterGetersInterface::StaticClass()))
+	if (PlayerPawn->GetClass()->ImplementsInterface(UCharacterSettersInterface::StaticClass()))
 	{
 		// Вызываем метод AddExp у игрока
-		ICharacterGetersInterface::Execute_AddExp(PlayerPawn, Exp); // Добавляем 100 опыта
+		ICharacterSettersInterface::Execute_AddExp(PlayerPawn, Exp); // Добавляем 100 опыта
 		UE_LOG(LogTemp, Log, TEXT("Die: Added 100 exp to player"));
 	}
 	else

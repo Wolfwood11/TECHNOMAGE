@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -22,9 +22,6 @@ class TECHNOMAGE_API ICharacterGetersInterface
 	GENERATED_BODY()
 public:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Character Getters")
-	void AddExp(int exp);
-
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Character Getters")
 	float GetHealth() const;
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Character Getters")
@@ -35,8 +32,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Character Getters")
 	float GetMaxMana() const;
-
-
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Character Getters")
 	int32 GetLevel() const;
@@ -49,4 +44,23 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Modifiers")
 	TArray<UModifierData*> GetModifiers(EModifierType Type) const;
+
+	// Получение множителя стата
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Character Getters")
+	float GetStatMultiplier(ECharacterStatType StatType) const;
+
+	// Получение текущего значения стата
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Character Getters")
+	int32 GetStatValue(ECharacterStatType StatType) const;
+
+	// Получение стоимости повышения стата
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Character Getters")
+	int32 GetStatUpgradeCost(ECharacterStatType StatType) const;
+
+	// Получение доступных очков
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Character Getters")
+	int32 GetAvailableStatPoints() const;
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Character Getters")
+	float GetCharacterParam(ECharacterParamType ParamType) const;
 };

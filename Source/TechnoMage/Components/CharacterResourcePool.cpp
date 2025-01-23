@@ -9,11 +9,17 @@ UCharacterResourcePool::UCharacterResourcePool()
 	PrimaryComponentTick.bCanEverTick = true;
 
 	// Задание начальных значений
+	BaseMaxResource = 100.0f;
 	MaxResource = 100.0f;
-	RegenRate = 5.0f;
+
+	BaseRegenRate = 5.f;
+	RegenRate = 5.f;
+
 	CurrentResource = MaxResource; // На старте ресурс заполнен полностью
 	bAllowNegativeResource = false;
 	ModifierTypeAffects = EModifierType::Health;
+	CharacterParamMaxValue = ECharacterParamType::MaxHpMultiplier;
+	CharacterParamRegenRate = ECharacterParamType::HpRegenMultiplier;
 }
 
 void UCharacterResourcePool::SaveData_Implementation(TArray<uint8>& OutData)
@@ -67,27 +73,27 @@ void UCharacterResourcePool::ProcessModifiers(float DeltaTime)
 {
 	if (GetOwner()->GetClass()->ImplementsInterface(UCharacterGetersInterface::StaticClass()))
 	{
-		if (ICharacterGetersInterface* actor = Cast<ICharacterGetersInterface>(GetOwner()))
+		MaxResource = BaseMaxResource * ICharacterGetersInterface::Execute_GetCharacterParam(GetOwner(), CharacterParamMaxValue);
+		RegenRate = BaseRegenRate * ICharacterGetersInterface::Execute_GetCharacterParam(GetOwner(), CharacterParamRegenRate);
+		TArray<UModifierData*> modifiers = ICharacterGetersInterface::Execute_GetModifiers(GetOwner(), ModifierTypeAffects);
+
+		for (UModifierData* Modifier : modifiers)
 		{
-			TArray<UModifierData*> modifiers = ICharacterGetersInterface::Execute_GetModifiers(GetOwner(), ModifierTypeAffects);;
-			for (UModifierData* Modifier : modifiers)
+			switch (Modifier->OperationType)
 			{
-				switch (Modifier->OperationType)
-				{
-				case EModifierOperationType::Add:
-					CurrentResource += Modifier->ModifierValue * DeltaTime;
-					break;
-				case EModifierOperationType::Subtract:
-					CurrentResource -= Modifier->ModifierValue * DeltaTime;
-					break;
-				case EModifierOperationType::Max:
-					CurrentResource = MaxResource;
-					break;
-				case EModifierOperationType::Min:
-					CurrentResource = 0;
-					break;
-				default:;
-				}
+			case EModifierOperationType::Add:
+				CurrentResource += Modifier->ModifierValue * DeltaTime;
+				break;
+			case EModifierOperationType::Subtract:
+				CurrentResource -= Modifier->ModifierValue * DeltaTime;
+				break;
+			case EModifierOperationType::Max:
+				CurrentResource = MaxResource;
+				break;
+			case EModifierOperationType::Min:
+				CurrentResource = 0;
+				break;
+			default:;
 			}
 		}
 	}
@@ -166,12 +172,12 @@ void UCharacterResourcePool::SetCurrentResource(float NewValue)
 
 void UCharacterResourcePool::RegenerateResource(float DeltaTime)
 {
+	ProcessModifiers(DeltaTime);
+
 	if (CurrentResource < MaxResource)
 	{
 		CurrentResource += RegenRate * DeltaTime;
-		ProcessModifiers(DeltaTime);
-		CurrentResource = FMath::Clamp(CurrentResource, bAllowNegativeResource ? -FLT_MAX : 0.0f, MaxResource);
 	}
 
-
+	CurrentResource = FMath::Clamp(CurrentResource, bAllowNegativeResource ? -FLT_MAX : 0.0f, MaxResource);
 }

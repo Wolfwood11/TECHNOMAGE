@@ -4,10 +4,11 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "TechnoMage/ObjectPool.h"
 #include "TechnoMage/Components/CharacterResourcePool.h"
+#include "TechnoMage/Components/CustomCharacterMovementComponent.h"
 #include "TechnoMage/Subsystems/ActorTrackingSubsystem.h"
 #include "TechnoMage/UIActors/DamageNumberActor.h"
 
-ABaseCharacter::ABaseCharacter()
+ABaseCharacter::ABaseCharacter(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer.SetDefaultSubobjectClass<UCustomCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
 {
 	PrimaryActorTick.bCanEverTick = true;
 	// Настраиваем коллизию капсулы
@@ -42,47 +43,7 @@ void ABaseCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 void ABaseCharacter::ProcessSpeedModifiers() const
 {
-	if (maxSpeed <= 0)
-	{
-		check(false);
-		return;
-	}
 
-	float CurrentMaxSpeed = maxSpeed;
-	TArray<UModifierData*> modifiers = GetModifiers_Implementation(EModifierType::Speed);
-	for (UModifierData* Modifier : modifiers)
-	{
-		switch (Modifier->OperationType)
-		{
-		case EModifierOperationType::Add:
-			CurrentMaxSpeed += Modifier->ModifierValue;
-			break;
-		case EModifierOperationType::Subtract:
-			CurrentMaxSpeed -= Modifier->ModifierValue;
-			break;
-		case EModifierOperationType::Max:
-			CurrentMaxSpeed = maxSpeed;
-			break;
-		case EModifierOperationType::Multiply:
-			CurrentMaxSpeed *= Modifier->ModifierValue;
-			break;
-		case EModifierOperationType::Divide:
-			CurrentMaxSpeed /= Modifier->ModifierValue;
-			break;
-		case EModifierOperationType::Replace:
-			CurrentMaxSpeed = Modifier->ModifierValue;
-			break;
-		case EModifierOperationType::Min:
-			CurrentMaxSpeed = 0;
-			break;
-		default:;
-		}
-	}
-
-	if (GetCharacterMovement())
-	{
-		GetCharacterMovement()->MaxWalkSpeed = FMath::Clamp(CurrentMaxSpeed, 0, 2 * maxSpeed);
-	}
 }
 
 void ABaseCharacter::Tick(float DeltaSeconds)
@@ -173,5 +134,5 @@ float ABaseCharacter::GetMaxMana_Implementation() const
 
 void ABaseCharacter::AddExp_Implementation(int exp)
 {
-	ICharacterGetersInterface::AddExp_Implementation(exp);
+	ICharacterSettersInterface::AddExp_Implementation(exp);
 }

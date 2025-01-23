@@ -60,6 +60,12 @@ void ABaseSpell::ActivateFromPoll(const FTransform& transform, AActor* NewInstig
 	PlayActivationEffect();
 }
 
+void ABaseSpell::ActivateSpell(const FTransform& transform, AActor* NewInstigatorActor, float damageModificator)
+{
+	ActivateFromPoll(transform, NewInstigatorActor);
+	DamageModificator = damageModificator;
+}
+
 void ABaseSpell::AddModifier(UModifierData* modifier)
 {
 	if (!modifier) return;
@@ -90,6 +96,11 @@ float ABaseSpell::GetSpellCooldown() const
 float ABaseSpell::GetDamage() const
 {
 	return Damage;
+}
+
+float ABaseSpell::GetDamageModificator() const
+{
+	return DamageModificator;
 }
 
 float ABaseSpell::GetMaxDamage() const
@@ -126,6 +137,8 @@ FDamageResult ABaseSpell::CalculateDamage() const
 	{
 		Result.Damage = FMath::FRandRange(Damage, MaxDamage);
 	}
+
+	Result.Damage *= DamageModificator;
 
 	Result.Element = Element;
 

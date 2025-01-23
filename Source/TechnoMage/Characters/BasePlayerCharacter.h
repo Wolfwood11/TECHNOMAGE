@@ -29,12 +29,20 @@ public:
 	virtual void LoadData_Implementation(const TArray<uint8>& InData) override;
 
 	virtual void AddExp_Implementation(int exp) override;
+	virtual void AllocateStat_Implementation(ECharacterStatType StatType) override;
 	virtual int32 GetLevel_Implementation() const override;
 	virtual int32 GetExp_Implementation() const override;
 	virtual int32 GetExpToNextLevel_Implementation() const override;
+	float GetStatMultiplier_Implementation(ECharacterStatType StatType) const;
 
 	virtual float GetMana_Implementation() const override;
 	virtual float GetMaxMana_Implementation() const override;
+	void SavePlayerData();
+	void OnLevelUp_Implementation(int32 NewLevel);
+	int32 GetStatValue_Implementation(ECharacterStatType StatType) const;
+	int32 GetStatUpgradeCost_Implementation(ECharacterStatType StatType) const;
+	int32 GetAvailableStatPoints_Implementation() const;
+	float GetCharacterParam_Implementation(ECharacterParamType ParamType) const;
 
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);

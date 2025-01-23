@@ -73,6 +73,12 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource Pool")
 	EModifierType ModifierTypeAffects;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource Pool")
+	ECharacterParamType CharacterParamMaxValue;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource Pool")
+	ECharacterParamType CharacterParamRegenRate;
+
 	// Текущее значение ресурса
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Resource Pool")
 	float CurrentResource;
@@ -84,6 +90,14 @@ protected:
 	// Скорость восстановления ресурса (в единицах в секунду)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource Pool", meta = (ClampMin = "0.0"))
 	float RegenRate;
+
+	// Максимальное значение ресурса
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource Pool", meta = (ClampMin = "0.0"))
+	float BaseMaxResource;
+
+	// Скорость восстановления ресурса (в единицах в секунду)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource Pool", meta = (ClampMin = "0.0"))
+	float BaseRegenRate;
 
 	// Разрешить потребление ниже 0
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource Pool")

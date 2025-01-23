@@ -188,25 +188,13 @@ void ABasePlayerCharacter::ExecuteDash()
 void ABasePlayerCharacter::AddExp_Implementation(int exp)
 {
 	Leveling->AddExperience(exp);
-	if (USaveSubsystem* SaveSubsystem = GetWorld()->GetGameInstance()->GetSubsystem<USaveSubsystem>())
-	{
-		SaveSubsystem->SaveActorData(this, "Player");
-	}
+	SavePlayerData();
 }
 
-int32 ABasePlayerCharacter::GetLevel_Implementation() const
+void ABasePlayerCharacter::AllocateStat_Implementation(ECharacterStatType StatType)
 {
-	return 0;
-}
-
-int32 ABasePlayerCharacter::GetExp_Implementation() const
-{
-	return 0;
-}
-
-int32 ABasePlayerCharacter::GetExpToNextLevel_Implementation() const
-{
-	return 0;
+	Leveling->AllocateStatPoint(StatType);
+	SavePlayerData();
 }
 
 float ABasePlayerCharacter::GetMana_Implementation() const
@@ -225,4 +213,59 @@ float ABasePlayerCharacter::GetMaxMana_Implementation() const
 		return ManaPool->GetMaxResource();
 	}
 	return 1;
+}
+
+void ABasePlayerCharacter::SavePlayerData()
+{
+	if (USaveSubsystem* SaveSubsystem = GetWorld()->GetGameInstance()->GetSubsystem<USaveSubsystem>())
+	{
+		SaveSubsystem->SaveActorData(this, "Player");
+	}
+}
+
+void ABasePlayerCharacter::OnLevelUp_Implementation(int32 NewLevel)
+{
+	UE_LOG(LogTemp, Log, TEXT("Level Up! New Level: %d"), NewLevel);
+	SavePlayerData();
+}
+
+int32 ABasePlayerCharacter::GetStatValue_Implementation(ECharacterStatType StatType) const
+{
+	return Leveling->GetStatValue(StatType);
+}
+
+int32 ABasePlayerCharacter::GetStatUpgradeCost_Implementation(ECharacterStatType StatType) const
+{
+	return Leveling->GetStatUpgradeCost(StatType);
+}
+
+int32 ABasePlayerCharacter::GetAvailableStatPoints_Implementation() const
+{
+	return Leveling->GetAvailableStatPoints();
+}
+
+float ABasePlayerCharacter::GetCharacterParam_Implementation(ECharacterParamType ParamType) const
+{
+
+	return Leveling->GetCharacterParam(ParamType);
+}
+
+int32 ABasePlayerCharacter::GetLevel_Implementation() const
+{
+	return Leveling->GetLevel();
+}
+
+int32 ABasePlayerCharacter::GetExp_Implementation() const
+{
+	return Leveling->GetExperience();
+}
+
+int32 ABasePlayerCharacter::GetExpToNextLevel_Implementation() const
+{
+	return Leveling->GetExperienceToNextLevel();
+}
+
+float ABasePlayerCharacter::GetStatMultiplier_Implementation(ECharacterStatType StatType) const
+{
+	return Leveling->GetStatMultiplier(StatType);
 }

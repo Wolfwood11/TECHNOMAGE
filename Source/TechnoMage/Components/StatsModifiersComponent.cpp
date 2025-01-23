@@ -74,6 +74,42 @@ void UStatsModifiersComponent::RemoveOpposite(ESpellElement element)
 	}
 }
 
+void UStatsModifiersComponent::ProcessModifiers(const TArray<UModifierData*>& Modifiers, float& inValue)
+{
+	for (const auto& Modifier : Modifiers)
+	{
+		if (!Modifier)
+		{
+			continue;
+		}
+
+		switch (Modifier->OperationType)
+		{
+		case EModifierOperationType::Add:
+			inValue += Modifier->ModifierValue;
+			break;
+		case EModifierOperationType::Multiply:
+			inValue *= Modifier->ModifierValue;
+			break;
+		case EModifierOperationType::Replace:
+			inValue = Modifier->ModifierValue;
+			break;
+		case EModifierOperationType::Subtract:
+			inValue -= Modifier->ModifierValue;
+			break;
+		case EModifierOperationType::Divide:
+			inValue /= Modifier->ModifierValue;
+			break;
+		case EModifierOperationType::Min:
+			inValue = FMath::Min(inValue, Modifier->ModifierValue);
+			break;
+		case EModifierOperationType::Max:
+			inValue = FMath::Max(inValue, Modifier->ModifierValue);
+			break;
+		}
+	}
+}
+
 void UStatsModifiersComponent::BeginPlay()
 {
 	Super::BeginPlay();

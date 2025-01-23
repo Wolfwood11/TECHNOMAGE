@@ -37,6 +37,23 @@ void USpellCaster::TickComponent(float DeltaTime, enum ELevelTick TickType,
 
 void USpellCaster::CastNextSpell()
 {
+	auto calculateCooldown = [&](float cooldown)
+		{
+			AActor* OwnerActor = GetOwner();
+			if (!OwnerActor || !OwnerActor->GetClass()->ImplementsInterface(UCharacterGetersInterface::StaticClass()))
+			{
+				return 1.f;
+			}
+
+			// Получаем модификаторы скорости через интерфейс
+			float CooldownMultiplier = FMath::Max(1.f, ICharacterGetersInterface::Execute_GetCharacterParam(OwnerActor, ECharacterParamType::CastDelayMultiplier));
+			TArray<UModifierData*> Modifiers = ICharacterGetersInterface::Execute_GetModifiers(OwnerActor, EModifierType::Speed);
+			float EffectModifier = 1.f;
+			UStatsModifiersComponent::ProcessModifiers(Modifiers, EffectModifier);
+			CooldownMultiplier = EffectModifier > 0 ? CooldownMultiplier / EffectModifier : CooldownMultiplier;
+			return cooldown / CooldownMultiplier;
+		};
+
 	// Проверяем, можно ли кастовать
 	if (CasterCooldownTimer > 0.0f)
 	{
@@ -67,7 +84,7 @@ void USpellCaster::CastNextSpell()
 	if (CurrentSpellIndex >= SpellQueue.Num())
 	{
 		CurrentSpellIndex = 0; // Сбрасываем индекс, если дошли до конца очереди
-		CasterCooldownTimer = CasterCooldown; // Задаем кулдаун кастера
+		CasterCooldownTimer = calculateCooldown(CasterCooldown); // Задаем кулдаун кастера
 		return;
 	}
 
@@ -79,7 +96,7 @@ void USpellCaster::CastNextSpell()
 		ExecuteSpell(Spell);
 
 		// Устанавливаем кулдаун для заклинания
-		CasterCooldownTimer = Spell->GetSpellCooldown();
+		CasterCooldownTimer = calculateCooldown(Spell->GetSpellCooldown());
 		CurrentSpellIndex++;
 	}
 	else if (Spell)
@@ -212,7 +229,13 @@ void USpellCaster::ExecuteSpell(ABaseSpell* Spell)
 	// Потребляем ману и активируем заклинание
 	if (ManaPool->ConsumeResource(Spell->GetSpellCost()))
 	{
-		Spell->ActivateFromPoll(SpawnTransform, GetOwner());
+		AActor* OwnerActor = GetOwner();
+		if (!OwnerActor || !OwnerActor->GetClass()->ImplementsInterface(UCharacterGetersInterface::StaticClass()))
+		{
+			return;
+		}
+		const float matkMultiplier = FMath::Max(1.f, ICharacterGetersInterface::Execute_GetCharacterParam(OwnerActor, ECharacterParamType::MatkMultiplier));
+		Spell->ActivateSpell(SpawnTransform, GetOwner(), matkMultiplier);
 	}
 	else
 	{
