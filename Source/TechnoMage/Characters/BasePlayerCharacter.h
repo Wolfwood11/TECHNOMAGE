@@ -6,6 +6,7 @@
 #include "TechnoMage/Interfaces/SaveableInterface.h"
 #include "BasePlayerCharacter.generated.h"
 
+class UMeleeCombatComponent;
 class ULevelingComponent;
 class USpringArmComponent;
 class UCameraComponent;
@@ -66,8 +67,12 @@ public:
 	/** Fire Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* FireAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* AttackAction;
 	void Fire(const FInputActionValue& Value);
 	void ExecuteDash();
+	void Attack(const FInputActionValue& Value);
 
 protected:
 	virtual void BeginPlay() override;
@@ -93,4 +98,7 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Dash", meta = (AllowPrivateAccess = "true"))
 	ULevelingComponent* Leveling;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Dash", meta = (AllowPrivateAccess = "true"))
+	UMeleeCombatComponent* MeleeCombat;
 };

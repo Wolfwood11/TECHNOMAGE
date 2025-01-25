@@ -52,7 +52,7 @@ void ABaseCharacter::Tick(float DeltaSeconds)
 	ProcessSpeedModifiers();
 }
 
-void ABaseCharacter::ApplyDamage(const FDamageResult& damageResult)
+void ABaseCharacter::ApplyDamage_Implementation(const FDamageResult& damageResult)
 {
 	if (HealthPool)
 	{
@@ -81,7 +81,7 @@ void ABaseCharacter::ApplyDamage(const FDamageResult& damageResult)
 			DamageNumber->Initialize(Damage, DamageTextTransform, this, damageResult.bIsCritical);
 		}
 
-		if (!IsAlive())
+		if (!IsAlive_Implementation())
 		{
 			Die();
 			return;
@@ -97,7 +97,7 @@ void ABaseCharacter::ApplyDamage(const FDamageResult& damageResult)
 	}
 }
 
-bool ABaseCharacter::IsAlive() const
+bool ABaseCharacter::IsAlive_Implementation() const
 {
 	return HealthPool ? HealthPool->GetCurrentResource() > 0 : false;
 }

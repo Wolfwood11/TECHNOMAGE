@@ -157,11 +157,8 @@ void ABaseSpell::OnCapsuleOverlap(UPrimitiveComponent* OverlappedComponent, AAct
 
 	if (OtherActor->GetClass()->ImplementsInterface(UDamageableInterface::StaticClass()))
 	{
-		if (IDamageableInterface* DamageableActor = Cast<IDamageableInterface>(OtherActor))
-		{
-			const auto damage = CalculateDamage();
-			DamageableActor->ApplyDamage(damage);
-		}
+		const auto damage = CalculateDamage();
+		IDamageableInterface::Execute_ApplyDamage(OtherActor, damage);
 	}
 
 	// Вызов эффекта столкновения

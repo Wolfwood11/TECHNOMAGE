@@ -140,13 +140,13 @@ AActor* USpellCaster::FindClosestTarget() const
 	for (AActor* EnemyActor : AllEnemies)
 	{
 		AEnemyCharacter* Enemy = Cast<AEnemyCharacter>(EnemyActor);
-		if (!Enemy || !Enemy->IsAlive()) // Проверяем, что цель жива
+		if (!EnemyActor->GetClass()->ImplementsInterface(UDamageableInterface::StaticClass()) || !Enemy || !IDamageableInterface::Execute_IsAlive(EnemyActor)) // Проверяем, что цель жива
 		{
 			continue;
 		}
 
 		// Вычисляем расстояние до противника
-		float DistanceToEnemy = FVector::Dist(OwnerLocation, Enemy->GetActorLocation());
+		float DistanceToEnemy = FVector::Dist(OwnerLocation, EnemyActor->GetActorLocation());
 		if (DistanceToEnemy > TargetingRadius)
 		{
 			continue; // Пропускаем, если цель вне радиуса

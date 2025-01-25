@@ -49,6 +49,7 @@ enum class ECharacterParamType : uint8
 	MatkMultiplier UMETA(DisplayName = "MatkMultiplier"),
 	ArmorMultiplier  UMETA(DisplayName = "ArmorMultiplier"),
 	CastDelayMultiplier UMETA(DisplayName = "CastDelayMultiplier"),
+	AttackSpeed UMETA(DisplayName = "AttackSpeed"),
 	Evasion UMETA(DisplayName = "Evasion"),
 	Velocity UMETA(DisplayName = "Velocity"),
 	MaxHpMultiplier UMETA(DisplayName = "MaxHpMultiplier"),

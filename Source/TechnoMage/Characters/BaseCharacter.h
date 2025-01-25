@@ -20,8 +20,8 @@ public:
 	ABaseCharacter(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 	// Реализация интерфейсов
-	virtual void ApplyDamage(const FDamageResult& damageResult) override;
-	virtual bool IsAlive() const override;
+	virtual void ApplyDamage_Implementation(const FDamageResult& damageResult) override;
+	virtual bool IsAlive_Implementation() const override;
 	virtual void Die();
 
 	virtual TArray<UModifierData*> GetModifiers_Implementation(EModifierType Type) const override;

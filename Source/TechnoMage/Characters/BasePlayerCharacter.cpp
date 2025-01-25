@@ -12,6 +12,7 @@
 #include "Serialization/BufferArchive.h"
 #include "Serialization/MemoryReader.h"
 #include "TechnoMage/Components/LevelingComponent.h"
+#include "TechnoMage/Components/MeleeCombatComponent.h"
 #include "TechnoMage/Subsystems/SaveSubsystem.h"
 
 ABasePlayerCharacter::ABasePlayerCharacter()
@@ -57,6 +58,8 @@ ABasePlayerCharacter::ABasePlayerCharacter()
 	Dash = CreateDefaultSubobject<UDashComponent>(TEXT("Dash"));
 
 	Leveling = CreateDefaultSubobject<ULevelingComponent>(TEXT("Leveling"));
+
+	MeleeCombat = CreateDefaultSubobject<UMeleeCombatComponent>(TEXT("MeleeCombat"));
 }
 
 void ABasePlayerCharacter::SaveData_Implementation(TArray<uint8>& OutData)
@@ -148,6 +151,9 @@ void ABasePlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 
 		// Firing
 		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Triggered, this, &ABasePlayerCharacter::Fire);
+
+		// normal attack
+		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Triggered, this, &ABasePlayerCharacter::Attack);
 	}
 	else
 	{
@@ -182,6 +188,14 @@ void ABasePlayerCharacter::ExecuteDash()
 	if (Dash)
 	{
 		Dash->PerformDash();
+	}
+}
+
+void ABasePlayerCharacter::Attack(const FInputActionValue& Value)
+{
+	if (MeleeCombat)
+	{
+		MeleeCombat->PerformAttack(EAttackType::Normal);
 	}
 }
 

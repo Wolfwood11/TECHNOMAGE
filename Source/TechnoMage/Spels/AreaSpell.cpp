@@ -91,17 +91,14 @@ void AAreaSpell::DealDamage()
 			// Применяем урон только к актёрам с интерфейсом UDamageableInterface
 			if (HitActor && HitActor->GetClass()->ImplementsInterface(UDamageableInterface::StaticClass()))
 			{
-				if (IDamageableInterface* DamageableActor = Cast<IDamageableInterface>(HitActor))
-				{
-					const auto damage = CalculateDamage();
-					DamageableActor->ApplyDamage(damage);
+				const auto damage = CalculateDamage();
+				IDamageableInterface::Execute_ApplyDamage(HitActor, damage);
 
-					// Добавляем актёра в список обработанных
-					ProcessedActors.Add(HitActor);
+				// Добавляем актёра в список обработанных
+				ProcessedActors.Add(HitActor);
 
-					// Спавним эффект на каждой цели
-					TriggerEffect(Hit);
-				}
+				// Спавним эффект на каждой цели
+				TriggerEffect(Hit);
 			}
 		}
 	}
