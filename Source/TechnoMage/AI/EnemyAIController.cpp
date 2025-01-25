@@ -14,7 +14,7 @@ void AEnemyAIController::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (!PlayerActor)
+	if (!PlayerActor.IsValid() || !PlayerActor.Get())
 	{
 		return;
 	}
@@ -34,10 +34,10 @@ void AEnemyAIController::Tick(float DeltaTime)
 	}
 }
 
-void AEnemyAIController::MoveToPlayer(AActor* actor)
+void AEnemyAIController::MoveToPlayer(TWeakObjectPtr<AActor> actor)
 {
-	if (actor)
+	if (actor.IsValid() && actor.Get())
 	{
-		MoveToActor(PlayerActor, 5.f); // Идём к игроку с минимальным расстоянием 5 юнитов
+		MoveToActor(PlayerActor.Get(), 5.f); // Идём к игроку с минимальным расстоянием 5 юнитов
 	}
 }

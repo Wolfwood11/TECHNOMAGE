@@ -14,7 +14,7 @@ struct FModifierStateData
 
 	// Модификатор
 	UPROPERTY()
-	UModifierData* Modifier;
+	TObjectPtr<UModifierData> Modifier;
 
 	// Время действия модификатора
 	UPROPERTY()
@@ -22,11 +22,11 @@ struct FModifierStateData
 
 	// Ссылка на Cascade эффект
 	UPROPERTY()
-	UParticleSystemComponent* CascadeEffect;
+	TObjectPtr<UParticleSystemComponent> CascadeEffect;
 
 	// Ссылка на Niagara эффект
 	UPROPERTY()
-	UNiagaraComponent* NiagaraEffect;
+	TObjectPtr<UNiagaraComponent> NiagaraEffect;
 
 	FModifierStateData()
 		: Modifier(nullptr),

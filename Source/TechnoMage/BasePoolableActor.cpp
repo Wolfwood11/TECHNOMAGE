@@ -40,7 +40,7 @@ AActor* ABasePoolableActor::GetInstigatorActor() const
 	return nullptr;
 }
 
-void ABasePoolableActor::ActivateFromPoll(const FTransform& transform, AActor* NewInstigatorActor)
+void ABasePoolableActor::ActivateFromPoll(const FTransform& transform, TWeakObjectPtr<AActor> NewInstigatorActor)
 {
 	CurrentActiveLifeTime = 0.f;
 	InstigatorActor = NewInstigatorActor;

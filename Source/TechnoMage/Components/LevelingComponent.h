@@ -107,15 +107,15 @@ private:
 
 	// Таблица данных уровней
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Leveling", meta = (AllowPrivateAccess = "true"))
-	UDataTable* LevelDataTable;
+	TObjectPtr<UDataTable> LevelDataTable;
 
 	// Данные параметров персонажа
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Leveling", meta = (AllowPrivateAccess = "true"))
-	UCharacterParamData* CharacterParamData;
+	TObjectPtr<UCharacterParamData> CharacterParamData;
 
 	// Данные множителей статов
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Leveling", meta = (AllowPrivateAccess = "true"))
-	UStatsData* StatsData;
+	TObjectPtr<UStatsData> StatsData;
 
 	// Получить данные для текущего уровня
 	const FLevelData* GetLevelData(int32 Level) const;

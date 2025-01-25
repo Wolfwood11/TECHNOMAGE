@@ -37,11 +37,10 @@ void AObjectPool::InitializePool()
 
 		if (!ActorClass || InitialCount <= 0) continue;
 
-		TArray<ABasePoolableActor*>& Pool = ObjectPools.FindOrAdd(ActorClass);
+		TArray<TObjectPtr<ABasePoolableActor>>& Pool = ObjectPools.FindOrAdd(ActorClass);
 		for (int32 i = 0; i < InitialCount; ++i)
 		{
-			ABasePoolableActor* NewObject = CreateNewObject(ActorClass);
-			if (NewObject)
+			if (TObjectPtr<ABasePoolableActor> NewObject = CreateNewObject(ActorClass))
 			{
 				Pool.Add(NewObject);
 			}
@@ -49,11 +48,11 @@ void AObjectPool::InitializePool()
 	}
 }
 
-ABasePoolableActor* AObjectPool::CreateNewObject(const TSubclassOf<ABasePoolableActor>& Type)
+TObjectPtr<ABasePoolableActor> AObjectPool::CreateNewObject(const TSubclassOf<ABasePoolableActor>& Type)
 {
 	if (!Type || !Type->IsChildOf(ABasePoolableActor::StaticClass())) return nullptr;
 
-	ABasePoolableActor* NewObject = GetWorld()->SpawnActor<ABasePoolableActor>(Type, FVector::ZeroVector, FRotator::ZeroRotator);
+	TObjectPtr<ABasePoolableActor> NewObject = GetWorld()->SpawnActor<ABasePoolableActor>(Type, FVector::ZeroVector, FRotator::ZeroRotator);
 	if (NewObject)
 	{
 		NewObject->ReturnToPool();
@@ -62,31 +61,33 @@ ABasePoolableActor* AObjectPool::CreateNewObject(const TSubclassOf<ABasePoolable
 	return NewObject;
 }
 
-ABasePoolableActor* AObjectPool::GetObject(const TSubclassOf<ABasePoolableActor>& Type)
+TObjectPtr<ABasePoolableActor> AObjectPool::GetObject(const TSubclassOf<ABasePoolableActor>& Type)
 {
 	if (!Type || !Type->IsChildOf(ABasePoolableActor::StaticClass())) return nullptr;
 
 	// Проверяем, есть ли объекты в пуле для данного типа
-	TArray<ABasePoolableActor*>* Pool = ObjectPools.Find(Type);
-	if (Pool)
+	TArray<TObjectPtr<ABasePoolableActor>>* Pool = ObjectPools.Find(Type);
+	if (Pool && !Pool->IsEmpty())
 	{
-		for (ABasePoolableActor* Object : *Pool)
-		{
-			if (Object && Object->IsPooled())
+		TObjectPtr<ABasePoolableActor>* FoundObject = Pool->FindByPredicate([](const TObjectPtr<ABasePoolableActor>& Object)
 			{
-				Object->GetFromPool();
-				return Object;
-			}
+				return Object && Object->IsPooled();
+			});
+
+		if (FoundObject)
+		{
+			(*FoundObject)->GetFromPool();
+			return *FoundObject;
 		}
 	}
 
 	// Если объект не найден в пуле, создаём новый
-	ABasePoolableActor* NewObject = CreateNewObject(Type);
+	TObjectPtr<ABasePoolableActor> NewObject = CreateNewObject(Type);
 	if (NewObject)
 	{
 		if (!Pool)
 		{
-			ObjectPools.Add(Type, TArray<ABasePoolableActor*>());
+			ObjectPools.Add(Type, TArray<TObjectPtr<ABasePoolableActor>>());
 		}
 		ObjectPools[Type].Add(NewObject);
 		NewObject->GetFromPool();
@@ -96,7 +97,7 @@ ABasePoolableActor* AObjectPool::GetObject(const TSubclassOf<ABasePoolableActor>
 	return nullptr; // Не удалось найти или создать объект
 }
 
-void AObjectPool::ReturnObject(ABasePoolableActor* Object)
+void AObjectPool::ReturnObject(const TObjectPtr<ABasePoolableActor>& Object)
 {
 	if (Object)
 	{

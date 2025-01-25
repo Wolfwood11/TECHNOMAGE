@@ -37,15 +37,15 @@ protected:
 private:
 	// Текущее оружие
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
-	UMeeleWeapon* CurrentWeapon;
+	TObjectPtr<UMeeleWeapon> CurrentWeapon;
 
 	// Статический меш оружия
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
-	UStaticMeshComponent* WeaponMesh;
+	TObjectPtr<UStaticMeshComponent> WeaponMesh;
 
 	// Компонент коллизии для меча
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
-	UCapsuleComponent* WeaponCollision;
+	TObjectPtr<UCapsuleComponent> WeaponCollision;
 
 	// Сокет для привязки оружия
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
@@ -83,5 +83,5 @@ private:
 	bool bIsOnCooldown = false;
 
 	// Обработка цели, чтобы наносить урон один раз
-	TArray<AActor*> ProcessedTargets;
+	TArray<TWeakObjectPtr<AActor>> ProcessedTargets;
 };

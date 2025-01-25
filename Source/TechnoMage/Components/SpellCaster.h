@@ -20,18 +20,18 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Spell Caster")
 	void CastNextSpell();
 
-	void SetManaPool(UCharacterResourcePool* manaPoll);
-	AActor* FindClosestTarget() const;
+	void SetManaPool(TObjectPtr<UCharacterResourcePool> manaPoll);
+	TObjectPtr<AActor> FindClosestTarget() const;
 
 protected:
 	virtual void BeginPlay() override;
 	void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	// Проверить, можно ли запустить каст заклинания
-	bool CanCastSpell(ABaseSpell* Spell) const;
+	bool CanCastSpell(TObjectPtr<ABaseSpell> Spell) const;
 
 	// Выполнить каст заклинания
-	void ExecuteSpell(ABaseSpell* Spell);
+	void ExecuteSpell(TObjectPtr<ABaseSpell> Spell);
 
 private:
 	// Текущее заклинание
@@ -42,7 +42,7 @@ private:
 
 	// Ссылка на компонент маны
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spell Caster", meta = (AllowPrivateAccess = "true"))
-	UCharacterResourcePool* ManaPool;
+	TObjectPtr<UCharacterResourcePool> ManaPool;
 
 	// Очередь заклинаний для каста
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spell Caster", meta = (AllowPrivateAccess = "true"))

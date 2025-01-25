@@ -59,23 +59,23 @@ void ABaseCharacter::ApplyDamage_Implementation(const FDamageResult& damageResul
 		const auto Damage = damageResult.Damage;
 		HealthPool->ConsumeResource(Damage);
 
-		AObjectPool* objectPool = nullptr;
-		if (UActorTrackingSubsystem* Subsystem = GetWorld()->GetSubsystem<UActorTrackingSubsystem>())
+		TObjectPtr<AObjectPool> ObjectPool = nullptr;
+		if (TObjectPtr<UActorTrackingSubsystem> Subsystem = GetWorld()->GetSubsystem<UActorTrackingSubsystem>())
 		{
-			objectPool = Subsystem->GetRegisteredActor();
+			ObjectPool = Subsystem->GetRegisteredActor();
 		}
 
-		if (!objectPool)
+		if (!ObjectPool)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("USpellCaster: ObjectPool is empty!"));
 			return;
 		}
 
-		if (ADamageNumberActor* DamageNumber = Cast<ADamageNumberActor>(objectPool->GetObject(ADamageNumberActor::StaticClass())))
+		if (TObjectPtr<ADamageNumberActor> DamageNumber = Cast<ADamageNumberActor>(ObjectPool->GetObject(ADamageNumberActor::StaticClass())))
 		{
 			FTransform DamageTextTransform(
 				FQuat::Identity,                       // Поворот сброшен
-				GetActorLocation(), // Позиция на 200 единиц выше актора
+				GetActorLocation(),                    // Позиция на 200 единиц выше актора
 				FVector(1.0f)                          // Масштаб по умолчанию
 			);
 			DamageNumber->Initialize(Damage, DamageTextTransform, this, damageResult.bIsCritical);
@@ -86,6 +86,7 @@ void ABaseCharacter::ApplyDamage_Implementation(const FDamageResult& damageResul
 			Die();
 			return;
 		}
+
 		if (StatsModifiersComponent)
 		{
 			StatsModifiersComponent->ApplyModifier(damageResult);

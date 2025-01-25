@@ -14,8 +14,13 @@ class TECHNOMAGE_API UDashComponent : public UActorComponent
 
 public:
 	UDashComponent();
-	void SetManaPool(UCharacterResourcePool* manaPoll);
-	void SetDashEffect(UParticleSystemComponent* effect);
+	// Установить компонент маны
+	UFUNCTION(BlueprintCallable, Category = "Dash")
+	void SetManaPool(UCharacterResourcePool* ManaPool);
+
+	// Установить компонент эффекта
+	UFUNCTION(BlueprintCallable, Category = "Dash")
+	void SetDashEffect(UParticleSystemComponent* Effect);
 
 	// Выполнить рывок
 	UFUNCTION(BlueprintCallable, Category = "Dash")
@@ -78,8 +83,8 @@ private:
 
 	// Ссылка на компонент маны
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dash", meta = (AllowPrivateAccess = "true"))
-	UCharacterResourcePool* ManaPool;
+	TObjectPtr<UCharacterResourcePool> ManaPool;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Effects", meta = (AllowPrivateAccess = "true"))
-	UParticleSystemComponent* DashEffectComponent;
+	TObjectPtr<UParticleSystemComponent> DashEffectComponent;
 };

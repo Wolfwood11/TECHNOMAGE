@@ -18,7 +18,7 @@ public:
 	// Возвращает объект в пул
 	virtual void ReturnToPool();
 
-	virtual void ActivateFromPoll(const FTransform& transform, AActor* InstigatorActor);
+	virtual void ActivateFromPoll(const FTransform& transform, TWeakObjectPtr<AActor> InstigatorActor);
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Pool Configuration", meta = (AllowPrivateAccess = "true"))
 	float ActiveLifeTime = 1.5f;

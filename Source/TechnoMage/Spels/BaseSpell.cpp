@@ -50,7 +50,7 @@ void ABaseSpell::ReturnToPool()
 	Super::ReturnToPool();
 }
 
-void ABaseSpell::ActivateFromPoll(const FTransform& transform, AActor* NewInstigatorActor)
+void ABaseSpell::ActivateFromPoll(const FTransform& transform, TWeakObjectPtr<AActor> NewInstigatorActor)
 {
 	Super::ActivateFromPoll(transform, NewInstigatorActor);
 	if (ParticleSystemComponent)
@@ -60,7 +60,7 @@ void ABaseSpell::ActivateFromPoll(const FTransform& transform, AActor* NewInstig
 	PlayActivationEffect();
 }
 
-void ABaseSpell::ActivateSpell(const FTransform& transform, AActor* NewInstigatorActor, float damageModificator)
+void ABaseSpell::ActivateSpell(const FTransform& transform, TWeakObjectPtr<AActor> NewInstigatorActor, float damageModificator)
 {
 	ActivateFromPoll(transform, NewInstigatorActor);
 	DamageModificator = damageModificator;

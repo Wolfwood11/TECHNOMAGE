@@ -14,13 +14,13 @@ class TECHNOMAGE_API UActorTrackingSubsystem : public UWorldSubsystem
 
 public:
 	// Зарегистрировать актёра
-	void RegisterActor(AObjectPool* Actor);
+	void RegisterActor(TObjectPtr<AObjectPool> Actor);
 
 	// Удалить актёра из регистрации
-	void UnregisterActor(AObjectPool* Actor);
+	void UnregisterActor(TObjectPtr<AObjectPool> Actor);
 
 	// Получить зарегистрированный актёр
-	AObjectPool* GetRegisteredActor() const;
+	TObjectPtr<AObjectPool> GetRegisteredActor() const;
 
 private:
 	TWeakObjectPtr<AObjectPool> RegisteredActor;

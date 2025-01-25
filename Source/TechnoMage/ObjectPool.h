@@ -4,6 +4,8 @@
 #include "GameFramework/Actor.h"
 #include "ObjectPool.generated.h"
 
+class ABasePoolableActor;
+
 UCLASS()
 class TECHNOMAGE_API AObjectPool : public AActor
 {
@@ -13,10 +15,10 @@ public:
 	AObjectPool();
 
 	// Получить объект из пула по типу
-	class ABasePoolableActor* GetObject(const TSubclassOf<class ABasePoolableActor>& Type);
+	TObjectPtr<ABasePoolableActor> GetObject(const TSubclassOf<class ABasePoolableActor>& Type);
 
 	// Вернуть объект в пул
-	void ReturnObject(ABasePoolableActor* Object);
+	void ReturnObject(const TObjectPtr<ABasePoolableActor>& Object);
 
 protected:
 	virtual void BeginPlay() override;
@@ -28,11 +30,11 @@ protected:
 
 private:
 	// Мапа для хранения объектов пула
-	TMap<TSubclassOf<class ABasePoolableActor>, TArray<ABasePoolableActor*>> ObjectPools;
+	TMap<TSubclassOf<class ABasePoolableActor>, TArray<TObjectPtr<ABasePoolableActor>>> ObjectPools;
 
 	// Инициализация пула
 	void InitializePool();
 
 	// Создать новый объект и добавить его в пул
-	ABasePoolableActor* CreateNewObject(const TSubclassOf<ABasePoolableActor>& Type);
+	TObjectPtr<ABasePoolableActor> CreateNewObject(const TSubclassOf<ABasePoolableActor>& Type);
 };

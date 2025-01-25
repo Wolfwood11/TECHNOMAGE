@@ -5,6 +5,8 @@
 #include "..//BasePoolableActor.h"
 #include "DamageNumberActor.generated.h"
 
+class UTextRenderComponent;
+
 UCLASS()
 class TECHNOMAGE_API ADamageNumberActor : public ABasePoolableActor
 {
@@ -14,7 +16,7 @@ public:
 	ADamageNumberActor();
 
 	// Инициализация текста урона
-	void Initialize(float DamageAmount, const FTransform& transform, AActor* NewInstigatorActor, bool bIsCritical);
+	void Initialize(float DamageAmount, const FTransform& transform, TWeakObjectPtr<AActor> NewInstigatorActor, bool bIsCritical);
 
 protected:
 	virtual void BeginPlay() override;
@@ -40,7 +42,7 @@ private:
 
 	// Компонент для отображения текста
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
-	class UTextRenderComponent* TextRenderComponent;
+	TObjectPtr<UTextRenderComponent> TextRenderComponent;
 
 	// Скорость подъёма текста
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage", meta = (AllowPrivateAccess = "true"))

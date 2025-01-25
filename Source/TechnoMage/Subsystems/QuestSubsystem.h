@@ -35,14 +35,14 @@ public:
 private:
 	// Список всех активных квестов
 	UPROPERTY()
-	TArray<UQuest*> ActiveQuests;
+	TArray<TObjectPtr<UQuest>> ActiveQuests;
 
 	// Список завершённых квестов
 	UPROPERTY()
-	TArray<UQuest*> CompletedQuests;
+	TArray<TObjectPtr<UQuest>> CompletedQuests;
 
 	// Найти квест по имени
-	UQuest* FindQuestByName(const FString& QuestName) const;
+	TObjectPtr<UQuest> FindQuestByName(const FString& QuestName) const;
 
 	// Сохранённые данные о квестах
 	UPROPERTY()

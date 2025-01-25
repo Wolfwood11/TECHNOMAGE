@@ -164,19 +164,22 @@ const FLevelData* ULevelingComponent::GetLevelData(int32 Level) const
 {
 	if (!LevelDataTable)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("LevelDataTable is null"));
 		return nullptr;
 	}
 
-	for (const TPair<FName, uint8*>& Row : LevelDataTable->GetRowMap())
+	// Формируем имя строки на основе уровня
+	FName RowName = FName(*FString::FromInt(Level + 1));
+
+	// Используем встроенный метод FindRow для поиска строки
+	const FLevelData* RowData = LevelDataTable->FindRow<FLevelData>(RowName, TEXT("Lookup Level Data"), true);
+
+	if (!RowData)
 	{
-		const FLevelData* RowData = reinterpret_cast<FLevelData*>(Row.Value);
-		if (RowData && RowData->Level == (Level + 1))
-		{
-			return RowData;
-		}
+		UE_LOG(LogTemp, Warning, TEXT("Level %d not found in LevelDataTable"), Level + 1);
 	}
 
-	return nullptr;
+	return RowData;
 }
 
 float ULevelingComponent::GetCharacterParam(ECharacterParamType ParamType) const

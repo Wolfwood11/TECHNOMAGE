@@ -14,7 +14,7 @@ void UQuestSubsystem::AddQuest(UQuest* Quest)
 
 void UQuestSubsystem::UpdateQuestProgress(EQuestTargetType TargetType, const FString& TargetData, int32 Count)
 {
-	for (UQuest* Quest : ActiveQuests)
+	for (TObjectPtr<UQuest> Quest : ActiveQuests)
 	{
 		if (!Quest || Quest->QuestState != EQuestState::InProgress)
 		{
@@ -45,7 +45,7 @@ void UQuestSubsystem::UpdateQuestProgress(EQuestTargetType TargetType, const FSt
 
 void UQuestSubsystem::CompleteQuest(const FString& QuestName)
 {
-	UQuest* Quest = FindQuestByName(QuestName);
+	TObjectPtr<UQuest> Quest = FindQuestByName(QuestName);
 	if (Quest && Quest->AreObjectivesCompleted())
 	{
 		Quest->QuestState = EQuestState::Completed;
@@ -54,9 +54,9 @@ void UQuestSubsystem::CompleteQuest(const FString& QuestName)
 
 		// Активируем следующие квесты
 		TArray<UQuest*> NextQuests = Quest->GetNextQuests(EQuestState::Completed);
-		for (UQuest* NextQuest : NextQuests)
+		for (TObjectPtr<UQuest> NextQuest : NextQuests)
 		{
-			AddQuest(NextQuest);
+			AddQuest(NextQuest.Get());
 		}
 
 		// Сохраняем состояние
@@ -64,9 +64,9 @@ void UQuestSubsystem::CompleteQuest(const FString& QuestName)
 	}
 }
 
-UQuest* UQuestSubsystem::FindQuestByName(const FString& QuestName) const
+TObjectPtr<UQuest> UQuestSubsystem::FindQuestByName(const FString& QuestName) const
 {
-	for (UQuest* Quest : ActiveQuests)
+	for (TObjectPtr Quest : ActiveQuests)
 	{
 		if (Quest && Quest->QuestName == QuestName)
 		{
@@ -74,7 +74,7 @@ UQuest* UQuestSubsystem::FindQuestByName(const FString& QuestName) const
 		}
 	}
 
-	for (UQuest* Quest : CompletedQuests)
+	for (TObjectPtr Quest : CompletedQuests)
 	{
 		if (Quest && Quest->QuestName == QuestName)
 		{
@@ -90,7 +90,7 @@ void UQuestSubsystem::SaveQuestStates()
 	SavedQuestStates.Empty();
 
 	// Сохраняем состояние всех активных квестов
-	for (UQuest* Quest : ActiveQuests)
+	for (TObjectPtr Quest : ActiveQuests)
 	{
 		FQuestSaveData SaveData;
 		SaveData.QuestName = Quest->QuestName;
@@ -105,7 +105,7 @@ void UQuestSubsystem::SaveQuestStates()
 	}
 
 	// Сохраняем состояние завершённых квестов
-	for (UQuest* Quest : CompletedQuests)
+	for (TObjectPtr Quest : CompletedQuests)
 	{
 		FQuestSaveData SaveData;
 		SaveData.QuestName = Quest->QuestName;

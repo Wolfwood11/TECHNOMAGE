@@ -34,7 +34,7 @@ void AFlyingSpell::TriggerEffect(const FHitResult& ImpactResult)
 	// Дополнительная логика для FlyingSpell, если потребуется
 }
 
-void AFlyingSpell::ActivateFromPoll(const FTransform& transform, AActor* NewInstigatorActor)
+void AFlyingSpell::ActivateFromPoll(const FTransform& transform, TWeakObjectPtr<AActor> NewInstigatorActor)
 {
 	Super::ActivateFromPoll(transform, NewInstigatorActor);
 	if (ProjectileMovement)

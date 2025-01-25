@@ -109,7 +109,7 @@ void USpellCaster::CastNextSpell()
 	}
 }
 
-void USpellCaster::SetManaPool(UCharacterResourcePool* manaPoll)
+void USpellCaster::SetManaPool(TObjectPtr<UCharacterResourcePool> manaPoll)
 {
 	if (!manaPoll)
 	{
@@ -119,7 +119,7 @@ void USpellCaster::SetManaPool(UCharacterResourcePool* manaPoll)
 	ManaPool = manaPoll;
 }
 
-AActor* USpellCaster::FindClosestTarget() const
+TObjectPtr<AActor> USpellCaster::FindClosestTarget() const
 {
 	if (!GetOwner())
 	{
@@ -191,7 +191,7 @@ AActor* USpellCaster::FindClosestTarget() const
 	return ClosestTarget;
 }
 
-bool USpellCaster::CanCastSpell(ABaseSpell* Spell) const
+bool USpellCaster::CanCastSpell(TObjectPtr<ABaseSpell> Spell) const
 {
 	if (!ManaPool || !Spell)
 	{
@@ -202,7 +202,7 @@ bool USpellCaster::CanCastSpell(ABaseSpell* Spell) const
 	return ManaPool->HasEnoughResource(Spell->GetSpellCost());
 }
 
-void USpellCaster::ExecuteSpell(ABaseSpell* Spell)
+void USpellCaster::ExecuteSpell(TObjectPtr<ABaseSpell> Spell)
 {
 	if (!Spell)
 	{

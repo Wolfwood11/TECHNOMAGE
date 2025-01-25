@@ -38,7 +38,7 @@ void ADamageNumberActor::BeginPlay()
 	Super::BeginPlay();
 }
 
-void ADamageNumberActor::Initialize(float DamageAmount, const FTransform& transform, AActor* NewInstigatorActor, bool bIsCritical)
+void ADamageNumberActor::Initialize(float DamageAmount, const FTransform& transform, TWeakObjectPtr<AActor> NewInstigatorActor, bool bIsCritical)
 {
 	ActivateFromPoll(transform, NewInstigatorActor);
 

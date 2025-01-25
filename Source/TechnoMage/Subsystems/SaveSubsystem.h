@@ -34,7 +34,7 @@ public:
 private:
 	// Ссылка на объект сохранения
 	UPROPERTY()
-	UMainSaveGame* SaveGameInstance;
+	TObjectPtr<UMainSaveGame> SaveGameInstance;
 
 	// Инициализация объекта сохранения
 	void InitializeSaveGame();

@@ -22,10 +22,10 @@ protected:
 	virtual void TriggerEffect(const FHitResult& ImpactResult) override;
 
 public:
-	virtual void ActivateFromPoll(const FTransform& transform, AActor* NewInstigatorActor) override;
+	virtual void ActivateFromPoll(const FTransform& transform, TWeakObjectPtr<AActor> NewInstigatorActor) override;
 	virtual void ReturnToPool() override;
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
-	UProjectileMovementComponent* ProjectileMovement;
+	TObjectPtr<UProjectileMovementComponent> ProjectileMovement;
 };

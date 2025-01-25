@@ -82,23 +82,23 @@ protected:
 private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
-	USpringArmComponent* CameraBoom;
+	TObjectPtr<USpringArmComponent> CameraBoom;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
-	UCameraComponent* FollowCamera;
+	TObjectPtr<UCameraComponent> FollowCamera;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Resources", meta = (AllowPrivateAccess = "true"))
-	UCharacterResourcePool* ManaPool;
+	TObjectPtr<UCharacterResourcePool> ManaPool;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spells", meta = (AllowPrivateAccess = "true"))
-	USpellCaster* SpellCaster;
+	TObjectPtr<USpellCaster> SpellCaster;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Dash", meta = (AllowPrivateAccess = "true"))
-	UDashComponent* Dash;
+	TObjectPtr<UDashComponent> Dash;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Dash", meta = (AllowPrivateAccess = "true"))
-	ULevelingComponent* Leveling;
+	TObjectPtr<ULevelingComponent> Leveling;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Dash", meta = (AllowPrivateAccess = "true"))
-	UMeleeCombatComponent* MeleeCombat;
+	TObjectPtr<UMeleeCombatComponent> MeleeCombat;
 };

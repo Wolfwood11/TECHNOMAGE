@@ -16,12 +16,12 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	// Перемещение к игроку
-	void MoveToPlayer(AActor* actor);
+	void MoveToPlayer(TWeakObjectPtr<AActor> actor);
 
 private:
 	// Ссылка на игрока
 	UPROPERTY()
-	AActor* PlayerActor;
+	TWeakObjectPtr<AActor> PlayerActor;
 
 	// Радиус атаки
 	UPROPERTY(EditAnywhere, Category = "AI")

@@ -19,9 +19,9 @@ public:
 
 	virtual void ReturnToPool() override;
 
-	virtual void ActivateFromPoll(const FTransform& transform, AActor* NewInstigatorActor) override;
+	virtual void ActivateFromPoll(const FTransform& transform, TWeakObjectPtr<AActor> NewInstigatorActor) override;
 
-	virtual void ActivateSpell(const FTransform& transform, AActor* NewInstigatorActor, float damageModificator = 1.f);
+	virtual void ActivateSpell(const FTransform& transform, TWeakObjectPtr<AActor> NewInstigatorActor, float damageModificator = 1.f);
 
 	UFUNCTION(BlueprintCallable, Category = "Modifiers")
 	virtual void AddModifier(UModifierData* modifier);
@@ -73,10 +73,10 @@ protected:
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	UCapsuleComponent* CapsuleComponent;
+	TObjectPtr<UCapsuleComponent> CapsuleComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	UParticleSystemComponent* ParticleSystemComponent;
+	TObjectPtr<UParticleSystemComponent> ParticleSystemComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Configuration", meta = (AllowPrivateAccess = "true"))
 	float Damage = 10;
@@ -97,15 +97,15 @@ protected:
 	ESpellElement Element;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Configuration", meta = (AllowPrivateAccess = "true"))
-	TArray<UModifierData*> modifiers;
+	TArray< TObjectPtr<UModifierData>> modifiers;
 
 	// Эффект активации
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects", meta = (AllowPrivateAccess = "true"))
-	UParticleSystem* ActivationEffect;
+	TObjectPtr<UParticleSystem> ActivationEffect;
 
 	// Эффект столкновения
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects", meta = (AllowPrivateAccess = "true"))
-	UParticleSystem* CollisionEffect;
+	TObjectPtr<UParticleSystem> CollisionEffect;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RuntimeParams", meta = (AllowPrivateAccess = "true"))
 	float DamageModificator = 1.f;

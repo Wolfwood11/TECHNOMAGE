@@ -28,7 +28,7 @@ public:
 	ESpellElement ModifierElement;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Modifier")
-	TArray<USubSpell*> SubSpells;
+	TArray<TObjectPtr<USubSpell>> SubSpells;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Modifier")
 	float Chance;
@@ -47,23 +47,23 @@ public:
 
 	// Иконка для отображения модификатора (в UI)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Visuals")
-	UTexture2D* Icon;
+	TObjectPtr<UTexture2D> Icon;
 
 	// Niagara эффект при наложении
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Visuals|Niagara")
-	UNiagaraSystem* ApplyNiagaraEffect;
+	TObjectPtr<UNiagaraSystem> ApplyNiagaraEffect;
 
 	// Cascade эффект при наложении
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Visuals|Cascade")
-	UParticleSystem* ApplyCascadeEffect;
+	TObjectPtr<UParticleSystem> ApplyCascadeEffect;
 
 	// Niagara эффект при активном состоянии
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Visuals|Niagara")
-	UNiagaraSystem* ActiveNiagaraEffect;
+	TObjectPtr<UNiagaraSystem> ActiveNiagaraEffect;
 
 	// Cascade эффект при активном состоянии
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Visuals|Cascade")
-	UParticleSystem* ActiveCascadeEffect;
+	TObjectPtr<UParticleSystem> ActiveCascadeEffect;
 
 	// Конструктор по умолчанию
 	UModifierData()

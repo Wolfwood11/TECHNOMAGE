@@ -38,10 +38,10 @@ protected:
 	virtual void Tick(float DeltaSeconds) override;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "StatModifiers", meta = (AllowPrivateAccess = "true"))
-	UStatsModifiersComponent* StatsModifiersComponent;
+	TObjectPtr<UStatsModifiersComponent> StatsModifiersComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Resources", meta = (AllowPrivateAccess = "true"))
-	UCharacterResourcePool* HealthPool;
+	TObjectPtr<UCharacterResourcePool> HealthPool;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
 	float maxSpeed = 0;

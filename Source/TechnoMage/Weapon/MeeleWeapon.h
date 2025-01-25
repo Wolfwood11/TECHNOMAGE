@@ -40,13 +40,13 @@ public:
 
 	// Иконка оружия
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Visuals")
-	UTexture2D* Icon;
+	TObjectPtr<UTexture2D> Icon;
 
 	// Модель оружия
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Visuals")
-	UStaticMesh* WeaponModel;
+	TObjectPtr<UStaticMesh> WeaponModel;
 
 	// Анимация атаки
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
-	UAnimMontage* AttackAnimation;
+	TObjectPtr<UAnimMontage> AttackAnimation;
 };

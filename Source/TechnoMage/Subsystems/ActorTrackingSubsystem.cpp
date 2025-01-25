@@ -2,7 +2,7 @@
 
 #include "TechnoMage/ObjectPool.h"
 
-void UActorTrackingSubsystem::RegisterActor(AObjectPool* Actor)
+void UActorTrackingSubsystem::RegisterActor(TObjectPtr<AObjectPool> Actor)
 {
 	if (!Actor)
 	{
@@ -14,7 +14,7 @@ void UActorTrackingSubsystem::RegisterActor(AObjectPool* Actor)
 	UE_LOG(LogTemp, Log, TEXT("Actor %s registered."), *Actor->GetName());
 }
 
-void UActorTrackingSubsystem::UnregisterActor(AObjectPool* Actor)
+void UActorTrackingSubsystem::UnregisterActor(TObjectPtr<AObjectPool> Actor)
 {
 	if (RegisteredActor == Actor)
 	{
@@ -23,7 +23,7 @@ void UActorTrackingSubsystem::UnregisterActor(AObjectPool* Actor)
 	}
 }
 
-AObjectPool* UActorTrackingSubsystem::GetRegisteredActor() const
+TObjectPtr<AObjectPool>  UActorTrackingSubsystem::GetRegisteredActor() const
 {
 	return RegisteredActor.Get();
 }
