@@ -5,6 +5,7 @@
 #include "TechnoMage/Spels/DamageResult.h"
 #include "MeleeCombatComponent.generated.h"
 
+class UTrailManager;
 class UCapsuleComponent;
 class UMeeleWeapon;
 
@@ -46,6 +47,9 @@ private:
 	// Компонент коллизии для меча
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UCapsuleComponent> WeaponCollision;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UTrailManager> TrailManager;
 
 	// Сокет для привязки оружия
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))

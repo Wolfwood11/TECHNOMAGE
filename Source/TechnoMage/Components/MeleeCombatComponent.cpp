@@ -3,6 +3,10 @@
 #include "Components/StaticMeshComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "TimerManager.h"
+#include "Kismet/GameplayStatics.h"
+#include "Particles/ParticleSystemComponent.h"
+#include "Sound/SoundCue.h"
+#include "TechnoMage/Animations/TrailManager.h"
 #include "TechnoMage/Interfaces/DamageableInterface.h"
 #include "TechnoMage/Weapon/MeeleWeapon.h"
 
@@ -23,6 +27,8 @@ UMeleeCombatComponent::UMeleeCombatComponent()
 	WeaponCollision->SetCollisionResponseToAllChannels(ECR_Ignore);
 	WeaponCollision->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
 	WeaponCollision->OnComponentBeginOverlap.AddDynamic(this, &UMeleeCombatComponent::OnWeaponOverlap);
+
+	TrailManager = NewObject<UTrailManager>();
 }
 
 void UMeleeCombatComponent::BeginPlay()
@@ -79,6 +85,11 @@ void UMeleeCombatComponent::AttachWeaponToSocket()
 
 	// Подстраиваем размеры капсулы под меч
 	AdjustCollisionSize();
+
+	if (WeaponMesh && CurrentWeapon->WeaponParticleEffect)
+	{
+		TrailManager->Initialize(CurrentWeapon->WeaponParticleEffect, FName("trailStart"), FName("trailEnd"));
+	}
 }
 
 void UMeleeCombatComponent::AdjustCollisionSize()
@@ -100,10 +111,16 @@ void UMeleeCombatComponent::HandleAnimationNotify(FName NotifyName, const FBranc
 	if (NotifyName == "EnableWeaponCollision")
 	{
 		EnableWeaponCollision();
+		if (CurrentWeapon && CurrentWeapon->SwingSound)
+		{
+			UGameplayStatics::PlaySoundAtLocation(GetWorld(), CurrentWeapon->SwingSound, GetOwner()->GetActorLocation());
+		}
+		TrailManager->StartTrail(WeaponMesh);
 	}
 	else if (NotifyName == "DisableWeaponCollision")
 	{
 		DisableWeaponCollision();
+		TrailManager->StopTrail();
 	}
 }
 void UMeleeCombatComponent::PerformAttack(EAttackType AttackType)
@@ -145,15 +162,16 @@ void UMeleeCombatComponent::PerformAttack(EAttackType AttackType)
 
 void UMeleeCombatComponent::EnableWeaponCollision()
 {
+	ProcessedTargets.Empty();
 	if (WeaponCollision)
 	{
 		WeaponCollision->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-		ProcessedTargets.Empty();
 	}
 }
 
 void UMeleeCombatComponent::DisableWeaponCollision()
 {
+	ProcessedTargets.Empty();
 	if (WeaponCollision)
 	{
 		WeaponCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -163,8 +181,16 @@ void UMeleeCombatComponent::DisableWeaponCollision()
 void UMeleeCombatComponent::OnWeaponOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (!CurrentWeapon || !OtherActor || ProcessedTargets.Contains(OtherActor) || OtherActor == GetOwner())
+	// Проверяем базовые условия
+	if (!CurrentWeapon || !OtherActor || OtherActor == GetOwner())
 	{
+		return;
+	}
+
+	// Проверяем, если цель уже была обработана
+	if (ProcessedTargets.Contains(OtherActor))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Already processed target: %s"), *OtherActor->GetName());
 		return;
 	}
 
@@ -176,6 +202,18 @@ void UMeleeCombatComponent::OnWeaponOverlap(UPrimitiveComponent* OverlappedCompo
 	if (Damage.Damage < 5.0f)
 	{
 		return; // Не наносим урон, если он слишком мал
+	}
+
+	// Воспроизвести эффект удара
+	if (CurrentWeapon->HitEffect)
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), CurrentWeapon->HitEffect, SweepResult.ImpactPoint);
+	}
+
+	// Воспроизвести звук удара
+	if (CurrentWeapon->HitSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), CurrentWeapon->HitSound, SweepResult.ImpactPoint);
 	}
 
 	if (OtherActor->GetClass()->ImplementsInterface(UDamageableInterface::StaticClass()))

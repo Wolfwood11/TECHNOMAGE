@@ -11,6 +11,7 @@ UCharacterResourcePool::UCharacterResourcePool()
 	// Задание начальных значений
 	BaseMaxResource = 100.0f;
 	MaxResource = 100.0f;
+	CurrentResource = MaxResource;
 
 	BaseRegenRate = 5.f;
 	RegenRate = 5.f;
@@ -67,14 +68,17 @@ float UCharacterResourcePool::GetMaxResource() const
 void UCharacterResourcePool::BeginPlay()
 {
 	Super::BeginPlay();
+	CurrentResource = MaxResource;
 }
 
 void UCharacterResourcePool::ProcessModifiers(float DeltaTime)
 {
 	if (GetOwner()->GetClass()->ImplementsInterface(UCharacterGetersInterface::StaticClass()))
 	{
-		MaxResource = BaseMaxResource * ICharacterGetersInterface::Execute_GetCharacterParam(GetOwner(), CharacterParamMaxValue);
-		RegenRate = BaseRegenRate * ICharacterGetersInterface::Execute_GetCharacterParam(GetOwner(), CharacterParamRegenRate);
+		const auto maxMult = ICharacterGetersInterface::Execute_GetCharacterParam(GetOwner(), CharacterParamMaxValue);
+		const auto regenMult = ICharacterGetersInterface::Execute_GetCharacterParam(GetOwner(), CharacterParamRegenRate);
+		MaxResource = BaseMaxResource * (maxMult == 0 ? 1.f : maxMult);
+		RegenRate = BaseRegenRate * (regenMult == 0 ? 1.f : regenMult);
 		TArray<UModifierData*> modifiers = ICharacterGetersInterface::Execute_GetModifiers(GetOwner(), ModifierTypeAffects);
 
 		for (UModifierData* Modifier : modifiers)

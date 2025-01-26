@@ -81,7 +81,8 @@ void ABaseCharacter::ApplyDamage_Implementation(const FDamageResult& damageResul
 			DamageNumber->Initialize(Damage, DamageTextTransform, this, damageResult.bIsCritical);
 		}
 
-		if (!IsAlive_Implementation())
+		bool bIsTargetAlive = Execute_IsAlive(this);
+		if (!bIsTargetAlive)
 		{
 			Die();
 			return;

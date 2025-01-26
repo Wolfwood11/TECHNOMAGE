@@ -49,4 +49,20 @@ public:
 	// Анимация атаки
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
 	TObjectPtr<UAnimMontage> AttackAnimation;
+
+	// Партикл-эффект на оружии
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
+	TObjectPtr<UParticleSystem> WeaponParticleEffect;
+
+	// Партикл-эффект удара
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
+	TObjectPtr<UParticleSystem> HitEffect;
+
+	// Звук удара
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio")
+	TObjectPtr<USoundCue> HitSound;
+
+	// Звук замаха
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio")
+	TObjectPtr<USoundCue> SwingSound;
 };
