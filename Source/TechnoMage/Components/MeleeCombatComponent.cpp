@@ -1,4 +1,7 @@
 ﻿#include "MeleeCombatComponent.h"
+
+#include "DashComponent.h"
+#include "StatsModifiersComponent.h"
 #include "GameFramework/Actor.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -7,6 +10,8 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "Sound/SoundCue.h"
 #include "TechnoMage/Animations/TrailManager.h"
+#include "TechnoMage/Interfaces/ActionLockInterface.h"
+#include "TechnoMage/Interfaces/CharacterGetersInterface.h"
 #include "TechnoMage/Interfaces/DamageableInterface.h"
 #include "TechnoMage/Weapon/MeeleWeapon.h"
 
@@ -28,7 +33,11 @@ UMeleeCombatComponent::UMeleeCombatComponent()
 	WeaponCollision->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
 	WeaponCollision->OnComponentBeginOverlap.AddDynamic(this, &UMeleeCombatComponent::OnWeaponOverlap);
 
-	TrailManager = NewObject<UTrailManager>();
+	TrailManager = CreateDefaultSubobject<UTrailManager>(TEXT("TrailManager2"));
+	if (TrailManager)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("TrailManager"));
+	}
 }
 
 void UMeleeCombatComponent::BeginPlay()
@@ -52,6 +61,7 @@ void UMeleeCombatComponent::BeginPlay()
 	if (AnimInstance)
 	{
 		AnimInstance->OnPlayMontageNotifyBegin.AddDynamic(this, &UMeleeCombatComponent::HandleAnimationNotify);
+		AnimInstance->OnMontageEnded.AddDynamic(this, &UMeleeCombatComponent::OnMontageEnded);
 	}
 }
 
@@ -86,7 +96,21 @@ void UMeleeCombatComponent::AttachWeaponToSocket()
 	// Подстраиваем размеры капсулы под меч
 	AdjustCollisionSize();
 
-	if (WeaponMesh && CurrentWeapon->WeaponParticleEffect)
+	if (!TrailManager)
+	{
+		TrailManager = NewObject<UTrailManager>(this, UTrailManager::StaticClass());
+		if (TrailManager)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("TrailManager создан в BeginPlay"));
+			TrailManager->RegisterComponent();
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("Ошибка создания TrailManager"));
+		}
+	}
+
+	if (WeaponMesh && CurrentWeapon->WeaponParticleEffect && TrailManager)
 	{
 		TrailManager->Initialize(CurrentWeapon->WeaponParticleEffect, FName("trailStart"), FName("trailEnd"));
 	}
@@ -108,6 +132,14 @@ void UMeleeCombatComponent::AdjustCollisionSize()
 
 void UMeleeCombatComponent::HandleAnimationNotify(FName NotifyName, const FBranchingPointNotifyPayload& Payload)
 {
+	if (GetOwner() && GetOwner()->GetClass()->ImplementsInterface(UActionLockInterface::StaticClass()))
+	{
+		if (!IActionLockInterface::Execute_IsLockedByMe(GetOwner(), UMeleeCombatComponent::StaticClass()))
+		{
+			return;
+		}
+	}
+
 	if (NotifyName == "EnableWeaponCollision")
 	{
 		EnableWeaponCollision();
@@ -123,9 +155,65 @@ void UMeleeCombatComponent::HandleAnimationNotify(FName NotifyName, const FBranc
 		TrailManager->StopTrail();
 	}
 }
+
+void UMeleeCombatComponent::OnMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+	if (GetOwner() && GetOwner()->GetClass()->ImplementsInterface(UActionLockInterface::StaticClass()))
+	{
+		if (!IActionLockInterface::Execute_IsLockedByMe(GetOwner(), UMeleeCombatComponent::StaticClass()))
+		{
+			return;
+		}
+	}
+
+	if (Montage == CurrentWeapon->AttackAnimation)
+	{
+		GetWorld()->GetTimerManager().SetTimer(AttackCooldownTimer, [this]()
+			{
+				CurrentCooldownTime = 0.f;
+			}, CurrentCooldownTime, false);
+
+		UE_LOG(LogTemp, Log, TEXT("Attack animation montage ended. Interrupted: %s"), bInterrupted ? TEXT("True") : TEXT("False"));
+		if (GetOwner() && GetOwner()->GetClass()->ImplementsInterface(UActionLockInterface::StaticClass()))
+		{
+			IActionLockInterface::Execute_UnLock(GetOwner(), UMeleeCombatComponent::StaticClass());
+		}
+		// Снимаем блокировку или выполняем другие действия
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Different montage ended."));
+	}
+}
+
+float UMeleeCombatComponent::CalculateAttackSpeedMultiplier()
+{
+	AActor* OwnerActor = GetOwner();
+	if (!OwnerActor || !OwnerActor->GetClass()->ImplementsInterface(UCharacterGetersInterface::StaticClass()))
+	{
+		return 1.f;
+	}
+
+	// Получаем модификаторы скорости через интерфейс
+	float CooldownMultiplier = FMath::Max(1.f, ICharacterGetersInterface::Execute_GetCharacterParam(OwnerActor, ECharacterParamType::AttackSpeed));
+	TArray<UModifierData*> Modifiers = ICharacterGetersInterface::Execute_GetModifiers(OwnerActor, EModifierType::Speed);
+	float EffectModifier = 1.f;
+	UStatsModifiersComponent::ProcessModifiers(Modifiers, EffectModifier);
+	CooldownMultiplier = EffectModifier > 0 ? CooldownMultiplier / EffectModifier : CooldownMultiplier;
+	return CooldownMultiplier;
+}
+
 void UMeleeCombatComponent::PerformAttack(EAttackType AttackType)
 {
-	if (bIsOnCooldown)
+	if (GetOwner() && GetOwner()->GetClass()->ImplementsInterface(UActionLockInterface::StaticClass()))
+	{
+		if (IActionLockInterface::Execute_IsLocked(GetOwner()))
+		{
+			return;
+		}
+	}
+
+	if (IsAttackOnCooldown())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Attack is on cooldown!"));
 		return;
@@ -136,14 +224,14 @@ void UMeleeCombatComponent::PerformAttack(EAttackType AttackType)
 		UE_LOG(LogTemp, Warning, TEXT("No weapon equipped!"));
 		return;
 	}
-
-	float CooldownTime = CurrentWeapon->AttackSpeedMultiplier;
+	const float attackSpeedMultiplier = CalculateAttackSpeedMultiplier();
+	float CooldownTime = BaseCoolDownTime * CurrentWeapon->AttackSpeedMultiplier / attackSpeedMultiplier;
 	if (AttackType == EAttackType::Strong)
 	{
 		CooldownTime *= 3.0f; // Сильная атака увеличивает кулдаун
 	}
 
-	StartCooldown(CooldownTime);
+	SetupCooldown(CooldownTime);
 
 	// Проигрываем анимацию
 	if (CurrentWeapon->AttackAnimation)
@@ -154,7 +242,11 @@ void UMeleeCombatComponent::PerformAttack(EAttackType AttackType)
 			UAnimInstance* AnimInstance = Owner->FindComponentByClass<USkeletalMeshComponent>()->GetAnimInstance();
 			if (AnimInstance)
 			{
-				AnimInstance->Montage_Play(CurrentWeapon->AttackAnimation);
+				AnimInstance->Montage_Play(CurrentWeapon->AttackAnimation, attackSpeedMultiplier);
+				if (GetOwner() && GetOwner()->GetClass()->ImplementsInterface(UActionLockInterface::StaticClass()))
+				{
+					IActionLockInterface::Execute_Lock(GetOwner(), UMeleeCombatComponent::StaticClass(), true);
+				}
 			}
 		}
 	}
@@ -233,7 +325,14 @@ FDamageResult UMeleeCombatComponent::CalculateDamage(float InitialDamage, int Ta
 	float AttackMultiplier = (AttackType == EAttackType::Strong) ? 2.0f : 1.0f;
 
 	// Базовый урон
-	DamageResult.Damage = InitialDamage * DamageMultiplier * AttackMultiplier;
+	AActor* OwnerActor = GetOwner();
+	if (!OwnerActor || !OwnerActor->GetClass()->ImplementsInterface(UCharacterGetersInterface::StaticClass()))
+	{
+		return DamageResult;
+	}
+
+	const float paramsMultiplier = FMath::Max(1.f, ICharacterGetersInterface::Execute_GetCharacterParam(OwnerActor, ECharacterParamType::AtkMultiplier));
+	DamageResult.Damage = InitialDamage * DamageMultiplier * AttackMultiplier * paramsMultiplier;
 
 	// Проверка на критический удар
 	float CriticalChance = 10.f;
@@ -262,16 +361,12 @@ FDamageResult UMeleeCombatComponent::CalculateDamage(float InitialDamage, int Ta
 }
 
 
-void UMeleeCombatComponent::StartCooldown(float CooldownTime)
+void UMeleeCombatComponent::SetupCooldown(float CooldownTime)
 {
-	bIsOnCooldown = true;
-	GetWorld()->GetTimerManager().SetTimer(AttackCooldownTimer, [this]()
-		{
-			bIsOnCooldown = false;
-		}, CooldownTime, false);
+	CurrentCooldownTime = CooldownTime;
 }
 
 bool UMeleeCombatComponent::IsAttackOnCooldown() const
 {
-	return bIsOnCooldown;
+	return CurrentCooldownTime > 0;
 }

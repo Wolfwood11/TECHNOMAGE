@@ -6,14 +6,17 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "TrailManager.generated.h"
 
-UCLASS()
-class TECHNOMAGE_API UTrailManager : public UObject
+UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
+class TECHNOMAGE_API UTrailManager : public UActorComponent
 {
 	GENERATED_BODY()
 
 public:
+	UTrailManager();
+	~UTrailManager();
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Trail")
-	UParticleSystem* ParticleSystem;
+	TObjectPtr<UParticleSystem> ParticleSystem;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Trail")
 	FName StartSocketName;
@@ -22,7 +25,8 @@ public:
 	FName EndSocketName;
 
 private:
-	UParticleSystemComponent* SpawnedParticle;
+	UPROPERTY()
+	TObjectPtr<UParticleSystemComponent> SpawnedParticle;
 
 public:
 	void Initialize(UParticleSystem* InParticleSystem, FName InStartSocketName, FName InEndSocketName);

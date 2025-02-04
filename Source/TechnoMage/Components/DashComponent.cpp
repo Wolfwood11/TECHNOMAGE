@@ -5,6 +5,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "NiagaraFunctionLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "TechnoMage/Interfaces/ActionLockInterface.h"
 
 UDashComponent::UDashComponent()
 {
@@ -90,6 +91,14 @@ bool UDashComponent::CanDash() const
 		return false;
 	}
 
+	if (GetOwner() && GetOwner()->GetClass()->ImplementsInterface(UActionLockInterface::StaticClass()))
+	{
+		if (IActionLockInterface::Execute_IsLocked(GetOwner()))
+		{
+			return false;
+		}
+	}
+
 	return true;
 }
 
@@ -140,6 +149,11 @@ void UDashComponent::StartDash()
 	bIsDashing = true;
 	DashElapsedTime = 0.0f;
 
+	if (GetOwner() && GetOwner()->GetClass()->ImplementsInterface(UActionLockInterface::StaticClass()))
+	{
+		IActionLockInterface::Execute_Lock(GetOwner(), UDashComponent::StaticClass(), true);
+	}
+
 	UE_LOG(LogTemp, Log, TEXT("UDashComponent: Dash started!"));
 }
 
@@ -150,6 +164,11 @@ void UDashComponent::EndDash()
 	if (DashEffectComponent && DashEffectComponent->IsActive())
 	{
 		DashEffectComponent->DeactivateSystem();
+	}
+
+	if (GetOwner() && GetOwner()->GetClass()->ImplementsInterface(UActionLockInterface::StaticClass()))
+	{
+		IActionLockInterface::Execute_UnLock(GetOwner(), UDashComponent::StaticClass());
 	}
 	UE_LOG(LogTemp, Log, TEXT("UDashComponent: Dash ended!"));
 }

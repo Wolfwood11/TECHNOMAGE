@@ -36,6 +36,9 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	float BaseCoolDownTime = 0.3f;
+
 	// Текущее оружие
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UMeeleWeapon> CurrentWeapon;
@@ -64,6 +67,12 @@ private:
 	UFUNCTION()
 	void HandleAnimationNotify(FName NotifyName, const FBranchingPointNotifyPayload& Payload);
 
+	UFUNCTION()
+	void OnMontageEnded(UAnimMontage* Montage, bool bInterrupted);
+
+	UFUNCTION()
+	float CalculateAttackSpeedMultiplier();
+
 	// Обработчик нанесения урона
 	UFUNCTION()
 	void OnWeaponOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
@@ -78,13 +87,13 @@ private:
 
 	// Проверка кулдауна
 	bool IsAttackOnCooldown() const;
-	void StartCooldown(float CooldownTime);
+	void SetupCooldown(float CooldownTime);
 
 	// Таймер кулдауна
 	FTimerHandle AttackCooldownTimer;
 
 	// Состояние кулдауна
-	bool bIsOnCooldown = false;
+	float CurrentCooldownTime = 0.f;
 
 	// Обработка цели, чтобы наносить урон один раз
 	TArray<TWeakObjectPtr<AActor>> ProcessedTargets;

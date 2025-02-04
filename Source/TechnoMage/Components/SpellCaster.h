@@ -29,9 +29,16 @@ protected:
 
 	// Проверить, можно ли запустить каст заклинания
 	bool CanCastSpell(TObjectPtr<ABaseSpell> Spell) const;
+	void ActivateCastedSpell(TObjectPtr<ABaseSpell> Spell);
 
 	// Выполнить каст заклинания
 	void ExecuteSpell(TObjectPtr<ABaseSpell> Spell);
+
+	UFUNCTION()
+	void HandleAnimationNotify(FName NotifyName, const FBranchingPointNotifyPayload& Payload);
+
+	UFUNCTION()
+	void OnMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 
 private:
 	// Текущее заклинание
@@ -53,4 +60,10 @@ private:
 	float CasterCooldown = 0.5f;
 	float TargetingRadius = 5000;
 	float TargetingAngle = 15.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spell Caster", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UAnimMontage> SpellAnimation;
+
+	UPROPERTY();
+	TObjectPtr<ABaseSpell> CastedSpell;
 };

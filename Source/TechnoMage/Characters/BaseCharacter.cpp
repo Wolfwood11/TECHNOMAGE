@@ -10,6 +10,8 @@
 
 ABaseCharacter::ABaseCharacter(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer.SetDefaultSubobjectClass<UCustomCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
 {
+	CurrentLockComponent = nullptr;
+	CurrentLockTime = 0.f;
 	PrimaryActorTick.bCanEverTick = true;
 	// Настраиваем коллизию капсулы
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.f); // Радиус и высота капсулы
@@ -33,6 +35,9 @@ void ABaseCharacter::BeginPlay()
 	{
 		maxSpeed = GetCharacterMovement()->GetMaxSpeed();
 	}
+	CurrentLockComponent = nullptr;
+	CurrentLockTime = 0.f;
+	CurrentDisableMovement = false;
 	Super::BeginPlay();
 }
 
@@ -50,6 +55,15 @@ void ABaseCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 	ProcessSpeedModifiers();
+
+	if (CurrentLockComponent != nullptr)
+	{
+		CurrentLockTime -= DeltaSeconds;
+		if (CurrentLockTime <= 0.f)
+		{
+			UnlockActions();
+		}
+	}
 }
 
 void ABaseCharacter::ApplyDamage_Implementation(const FDamageResult& damageResult)
@@ -137,4 +151,76 @@ float ABaseCharacter::GetMaxMana_Implementation() const
 void ABaseCharacter::AddExp_Implementation(int exp)
 {
 	ICharacterSettersInterface::AddExp_Implementation(exp);
+}
+
+bool ABaseCharacter::Lock_Implementation(TSubclassOf<UActorComponent> ComponentClass, bool DisableMovement)
+{
+	if (!ComponentClass)
+	{
+		return false;
+	}
+
+	const float CurrentTime = GetWorld()->GetTimeSeconds();
+
+	if (CurrentLockComponent)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Action already locked by %s, cannot lock with %s"), *CurrentLockComponent->GetName(), *ComponentClass->GetName());
+		return false;
+	}
+
+	CurrentLockComponent = ComponentClass;
+	CurrentLockTime = maxLockTime;
+	CurrentDisableMovement = DisableMovement;
+
+	if (DisableMovement)
+	{
+		if (UCharacterMovementComponent* MovementComponent = GetCharacterMovement())
+		{
+			MovementComponent->StopMovementImmediately();
+			MovementComponent->DisableMovement();
+		}
+	}
+	return true;
+}
+
+void ABaseCharacter::UnlockActions()
+{
+	CurrentLockComponent = nullptr;
+	CurrentLockTime = 0.0f;
+	if (CurrentDisableMovement)
+	{
+		CurrentDisableMovement = false;
+		if (GetCharacterMovement())
+		{
+			GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+			UE_LOG(LogTemp, Log, TEXT("Movement re-enabled for character."));
+		}
+	}
+}
+
+bool ABaseCharacter::UnLock_Implementation(TSubclassOf<UActorComponent> ComponentClass)
+{
+	if (!ComponentClass || CurrentLockComponent != ComponentClass)
+	{
+		return false;
+	}
+
+	UnlockActions();
+
+	UE_LOG(LogTemp, Log, TEXT("Action unlocked by %s"), *ComponentClass->GetName());
+	return true;
+}
+
+bool ABaseCharacter::IsLocked_Implementation() const
+{
+	return CurrentLockComponent != nullptr;
+}
+
+bool ABaseCharacter::IsLockedByMe_Implementation(TSubclassOf<UActorComponent> ComponentClass) const
+{
+	if (ComponentClass && CurrentLockComponent == ComponentClass)
+	{
+		return true;
+	}
+	return false;
 }

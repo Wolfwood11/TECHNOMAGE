@@ -1,6 +1,22 @@
 ﻿#include "TrailManager.h"
 #include "Kismet/GameplayStatics.h"
 
+UTrailManager::UTrailManager()
+{
+	ParticleSystem = nullptr;
+	StartSocketName = "";
+	EndSocketName = "";
+	SpawnedParticle = nullptr;
+}
+
+UTrailManager::~UTrailManager()
+{
+	ParticleSystem = nullptr;
+	StartSocketName = "";
+	EndSocketName = "";
+	SpawnedParticle = nullptr;
+}
+
 void UTrailManager::Initialize(UParticleSystem* InParticleSystem, FName InStartSocketName, FName InEndSocketName)
 {
 	ParticleSystem = InParticleSystem;

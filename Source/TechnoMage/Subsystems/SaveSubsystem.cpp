@@ -15,9 +15,9 @@ void USaveSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 
 void USaveSubsystem::InitializeSaveGame()
 {
-	if (UGameplayStatics::DoesSaveGameExist(TEXT("DefaultSaveSlot4"), 0))
+	if (UGameplayStatics::DoesSaveGameExist(TEXT("DefaultSaveSlot5"), 0))
 	{
-		SaveGameInstance = Cast<UMainSaveGame>(UGameplayStatics::LoadGameFromSlot(TEXT("DefaultSaveSlot4"), 0));
+		SaveGameInstance = Cast<UMainSaveGame>(UGameplayStatics::LoadGameFromSlot(TEXT("DefaultSaveSlot5"), 0));
 	}
 	else
 	{
@@ -75,13 +75,13 @@ void USaveSubsystem::SaveActorData(AActor* Actor, const FString& ActorID)
 		}
 	}
 
-	SaveGame("DefaultSaveSlot4");
+	SaveGame("DefaultSaveSlot5");
 }
 
 
 void USaveSubsystem::LoadActorData(AActor* Actor, const FString& ActorID)
 {
-	LoadGame("DefaultSaveSlot4");
+	LoadGame("DefaultSaveSlot5");
 
 	if (!SaveGameInstance || !Actor)
 	{

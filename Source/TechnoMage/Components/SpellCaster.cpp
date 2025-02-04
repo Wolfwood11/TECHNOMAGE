@@ -25,6 +25,13 @@ void USpellCaster::BeginPlay()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("USpellCaster: ManaPool is not assigned!"));
 	}
+
+	UAnimInstance* AnimInstance = GetOwner()->FindComponentByClass<USkeletalMeshComponent>()->GetAnimInstance();
+	if (AnimInstance)
+	{
+		AnimInstance->OnPlayMontageNotifyBegin.AddDynamic(this, &USpellCaster::HandleAnimationNotify);
+		AnimInstance->OnMontageEnded.AddDynamic(this, &USpellCaster::OnMontageEnded);
+	}
 }
 
 void USpellCaster::TickComponent(float DeltaTime, enum ELevelTick TickType,
@@ -202,13 +209,8 @@ bool USpellCaster::CanCastSpell(TObjectPtr<ABaseSpell> Spell) const
 	return ManaPool->HasEnoughResource(Spell->GetSpellCost());
 }
 
-void USpellCaster::ExecuteSpell(TObjectPtr<ABaseSpell> Spell)
+void USpellCaster::ActivateCastedSpell(TObjectPtr<ABaseSpell> Spell)
 {
-	if (!Spell)
-	{
-		return;
-	}
-
 	FTransform SpawnTransform = GetOwner()->GetActorTransform();
 	AEnemyCharacter* Target = Cast<AEnemyCharacter>(FindClosestTarget());
 
@@ -226,19 +228,106 @@ void USpellCaster::ExecuteSpell(TObjectPtr<ABaseSpell> Spell)
 		UE_LOG(LogTemp, Warning, TEXT("USpellCaster: No target found, casting forward"));
 	}
 
-	// Потребляем ману и активируем заклинание
-	if (ManaPool->ConsumeResource(Spell->GetSpellCost()))
+	AActor* OwnerActor = GetOwner();
+	if (!OwnerActor || !OwnerActor->GetClass()->ImplementsInterface(UCharacterGetersInterface::StaticClass()))
 	{
-		AActor* OwnerActor = GetOwner();
-		if (!OwnerActor || !OwnerActor->GetClass()->ImplementsInterface(UCharacterGetersInterface::StaticClass()))
+		return;
+	}
+	const float matkMultiplier = FMath::Max(1.f, ICharacterGetersInterface::Execute_GetCharacterParam(OwnerActor, ECharacterParamType::MatkMultiplier));
+	Spell->ActivateSpell(SpawnTransform, GetOwner(), matkMultiplier);
+}
+
+void USpellCaster::ExecuteSpell(TObjectPtr<ABaseSpell> Spell)
+{
+	if (GetOwner() && GetOwner()->GetClass()->ImplementsInterface(UActionLockInterface::StaticClass()))
+	{
+		if (IActionLockInterface::Execute_IsLocked(GetOwner()))
 		{
 			return;
 		}
-		const float matkMultiplier = FMath::Max(1.f, ICharacterGetersInterface::Execute_GetCharacterParam(OwnerActor, ECharacterParamType::MatkMultiplier));
-		Spell->ActivateSpell(SpawnTransform, GetOwner(), matkMultiplier);
+	}
+
+	if (!Spell)
+	{
+		return;
+	}
+
+	// Потребляем ману и активируем заклинание
+	if (ManaPool->ConsumeResource(Spell->GetSpellCost()))
+	{
+		if (SpellAnimation)
+		{
+			AActor* Owner = GetOwner();
+			if (Owner)
+			{
+				UAnimInstance* AnimInstance = Owner->FindComponentByClass<USkeletalMeshComponent>()->GetAnimInstance();
+				if (AnimInstance)
+				{
+					AnimInstance->Montage_Play(SpellAnimation);
+					if (GetOwner() && GetOwner()->GetClass()->ImplementsInterface(UActionLockInterface::StaticClass()))
+					{
+						IActionLockInterface::Execute_Lock(GetOwner(), USpellCaster::StaticClass(), true);
+					}
+					CastedSpell = Spell;
+					return;
+				}
+			}
+		}
+		ActivateCastedSpell(Spell);
 	}
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("USpellCaster: Not enough mana to cast spell!"));
+	}
+}
+
+void USpellCaster::HandleAnimationNotify(FName NotifyName, const FBranchingPointNotifyPayload& Payload)
+{
+	if (GetOwner() && GetOwner()->GetClass()->ImplementsInterface(UActionLockInterface::StaticClass()))
+	{
+		if (!IActionLockInterface::Execute_IsLockedByMe(GetOwner(), USpellCaster::StaticClass()))
+		{
+			return;
+		}
+	}
+
+	if (NotifyName == "cast")
+	{
+		if (CastedSpell)
+		{
+			ActivateCastedSpell(CastedSpell);
+		}
+		CastedSpell = nullptr;
+	}
+}
+
+void USpellCaster::OnMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+	if (GetOwner() && GetOwner()->GetClass()->ImplementsInterface(UActionLockInterface::StaticClass()))
+	{
+		if (!IActionLockInterface::Execute_IsLockedByMe(GetOwner(), USpellCaster::StaticClass()))
+		{
+			return;
+		}
+	}
+
+	if (CastedSpell)
+	{
+		ActivateCastedSpell(CastedSpell);
+	}
+	CastedSpell = nullptr;
+
+	if (Montage == SpellAnimation)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Attack animation montage ended. Interrupted: %s"), bInterrupted ? TEXT("True") : TEXT("False"));
+		if (GetOwner() && GetOwner()->GetClass()->ImplementsInterface(UActionLockInterface::StaticClass()))
+		{
+			IActionLockInterface::Execute_UnLock(GetOwner(), USpellCaster::StaticClass());
+		}
+		// Снимаем блокировку или выполняем другие действия
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Different montage ended."));
 	}
 }
