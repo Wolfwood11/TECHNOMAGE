@@ -1,5 +1,8 @@
 ﻿#include "MeleeCombatComponent.h"
 
+#include <TechnoMage/CameraEffects/DamageCameraShake.h>
+#include <TechnoMage/CameraEffects/DamageCameraShakePerlin.h>
+
 #include "DashComponent.h"
 #include "StatsModifiersComponent.h"
 #include "GameFramework/Actor.h"
@@ -205,6 +208,14 @@ float UMeleeCombatComponent::CalculateAttackSpeedMultiplier()
 
 void UMeleeCombatComponent::PerformAttack(EAttackType AttackType)
 {
+	APlayerController* PlayerController = UGameplayStatics::GetPlayerController(this, 0);
+	TSubclassOf<UDamageCameraShakePerlin> CameraShakeClass = UDamageCameraShakePerlin::StaticClass();
+	if (CameraShakeClass && PlayerController)
+	{
+		// Play the camera shake
+		PlayerController->ClientStartCameraShake(CameraShakeClass);
+	}
+
 	if (GetOwner() && GetOwner()->GetClass()->ImplementsInterface(UActionLockInterface::StaticClass()))
 	{
 		if (IActionLockInterface::Execute_IsLocked(GetOwner()))

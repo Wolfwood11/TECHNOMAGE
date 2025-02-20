@@ -12,7 +12,7 @@ public class TechnoMage : ModuleRules
 			"SlateCore",
 			"UnrealEd", // Обязательно для UFactory
 			"EditorSubsystem"
-        });
+		});
         PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
 		PublicDependencyModuleNames.AddRange(new string[]
@@ -29,7 +29,8 @@ public class TechnoMage : ModuleRules
 			"UMG",
 			"Slate",
 			"SlateCore",
-            "EditorScriptingUtilities"
+            "EditorScriptingUtilities",
+            "GameplayCameras"
         });
     }
 }
